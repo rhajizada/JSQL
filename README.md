@@ -24,3 +24,7 @@ Multiple-table support
 Table creation and insertion
 Adding user prompt to the script
 
+# How to install and run
+Make sure you have Node js and npm installed on the machine you want to run it on
+Install following npm libraries : fs and jsonfile
+
