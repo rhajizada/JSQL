@@ -8,10 +8,10 @@ function setTable(t){
     if( table.length != 0){
         console.log('Table succesfully initialized');
     }
-}0
+}
 
 function schema() {
-    var attribute = new Array();
+    var attribute = [];
     for (var i = 0; i < Object.keys(table[0]).length; i++) {
         attribute.push(Object.keys(table[0])[i]);
     }
@@ -37,32 +37,37 @@ function printSchema() {
 }
 
 function printTable() {
-    var attribute = new Array();
+    var attribute = [];
+    var str = "";
     attribute = schema();
-    var tuple = new Array();
+    for(i in attribute){
+        str += attribute[i] + "\t\t";
+    }
+    console.log(str);
+    var tuple = [];
     for (var i = 0; i < table.length; i++) {
         for (var j = 0; j < attribute.length; j++) {
-            tuple[i] += " " + table[i][attribute[j]] + "  ";
+            tuple[i] += "\t" + table[i][attribute[j]] +  "\t";
         }
+        tuple[i] = tuple[i].substr(10);
         console.log(tuple[i]);
     }
 }
 
 function search(a, x) {
-    var result = new Array();
+    var result = [];
     for (var i = 0; i < table.length; i++) {
         if (table[i][a] == x) {
-            console.log(table[i]);
+            result.push(table[i]);
         }
     }
+    console.log(result);
 }
 
-function newTable(tableName){
-
-}
 
 //setTable('data.json');
-console.log(schema());
-printSchema();
-//printTable();
-search("Date", "2017-11-16");
+// console.log(schema());
+// printSchema();
+// //printTable();
+search("ID", 10);
+printTable();
