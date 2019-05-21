@@ -1,12 +1,11 @@
 var jsonfile = require('jsonfile');
-var table = jsonfile.readFileSync("data.json");
-
-//console.dir(table);
+// var table = jsonfile.readFileSync("data.json");
+var table;
 
 function setTable(t){
-    var table = jsonfile.readFileSync(t);
+    table = jsonfile.readFileSync(t);
     if( table.length != 0){
-        console.log('Table succesfully initialized');
+        console.log('Table ' + t +' succesfully initialized');
     }
 }
 
@@ -19,7 +18,7 @@ function schema() {
 }
 
 function schemaCheck() {
-    var cor = true;
+    var correct = true;
     for(var i = 0; i < table.length; i++){
         for(var j = 0; j < Object.keys(table[i]).length;j++){
             //if(){}
@@ -31,19 +30,15 @@ function printSchema() {
     // Prints the table schema 
     var schema = "";
     for (var i = 0; i < Object.keys(table[0]).length; i++) {
-        schema = schema + Object.keys(table[0])[i] + "    ";
+        schema = schema + Object.keys(table[0])[i] + "||";
     }
     console.log(schema);
 }
 
 function printTable() {
     var attribute = [];
-    var str = "";
     attribute = schema();
-    for(i in attribute){
-        str += attribute[i] + "\t\t";
-    }
-    console.log(str);
+    printSchema();
     var tuple = [];
     for (var i = 0; i < table.length; i++) {
         for (var j = 0; j < attribute.length; j++) {
@@ -54,20 +49,25 @@ function printTable() {
     }
 }
 
-function search(a, x) {
+function search(row, value) {
     var result = [];
     for (var i = 0; i < table.length; i++) {
-        if (table[i][a] == x) {
+        if (table[i][row] == value) {
             result.push(table[i]);
         }
     }
-    console.log(result);
+    if(result.length != 0){
+        console.log(result);
+    }
+    else{
+        console.log("Value not found!");
+    }
 }
 
 
-//setTable('data.json');
+setTable('data.json');
 // console.log(schema());
 // printSchema();
 // //printTable();
-search("ID", 10);
+// search("ID", 70); usage of search
 printTable();
