@@ -52,8 +52,6 @@ module.exports =  class Table {
         else{
             console.warn("Schema is not consistent throughtout the file");
         }
-
-        
     }
 
     checkSchema() {
@@ -90,16 +88,30 @@ module.exports =  class Table {
             console.log(tuple[i]);
         }
     }
-
-    search(row, value) {
+    
+    simpleSearch(column, value) {
         var result = [];
         for (var i = 0; i < this.table.length; i++) {
-            if (this.table[i][row] == value) {
+            if (this.table[i][column] == value) {
                 result.push(this.table[i]);
             }
         }
         if (result.length != 0) {
-            console.log(result);
+            return result;
+        } else {
+            console.log("Value not found!");
+        }
+    }
+    
+    simpleSearchWithAttribute(column, value, attribute){
+        var result = [];
+        for (var i = 0; i < this.table.length; i++) {
+            if (this.table[i][column] == value) {
+                result.push(this.table[i][attribute]);
+            }
+        }
+        if (result.length != 0) {
+            return result;
         } else {
             console.log("Value not found!");
         }
