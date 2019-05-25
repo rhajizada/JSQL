@@ -1,4 +1,4 @@
-if(Array.prototype.equals){
+if (Array.prototype.equals) {
     console.warn("Overriding existing Array.prototype.equals. Possible causes: New API defines the method, there's a framework conflict or you've got double inclusions in your code.");
 }
 // attach the .equals method to Array's prototype to call it on any array
@@ -11,36 +11,36 @@ Array.prototype.equals = function (array) {
     if (this.length != array.length)
         return false;
 
-    for (var i = 0, l=this.length; i < l; i++) {
+    for (var i = 0, l = this.length; i < l; i++) {
         // Check if we have nested arrays
         if (this[i] instanceof Array && array[i] instanceof Array) {
             // recurse into the nested arrays
             if (!this[i].equals(array[i]))
-                return false;       
-        }           
-        else if (this[i] != array[i]) { 
+                return false;
+        } else if (this[i] != array[i]) {
             // Warning - two different object instances will never be equal: {x:20} != {x:20}
-            return false;   
-        }           
-    }       
+            return false;
+        }
+    }
     return true;
 }
 // Hide method from for-in loops
-Object.defineProperty(Array.prototype, "equals", {enumerable: false});
+Object.defineProperty(Array.prototype, "equals", {
+    enumerable: false
+});
 // Dependencies
 jsonfile = require('jsonfile');
 fs = require('fs');
 
-module.exports =  class Table {
+module.exports = class Table {
     constructor(filename, name) {
         // Constructs a table object from JSON file given
         this.name = name;
         this.filename = filename;
         // Reads JSON file
-        try{
+        try {
             this.table = jsonfile.readFileSync(filename);
-        }
-        catch(e){
+        } catch (e) {
             throw new Error("Error reading " + filename);
         }
         // Prints that table is initialized succes
@@ -54,10 +54,9 @@ module.exports =  class Table {
         }
         // Checks correctness of schema
         this.schemaIsCorrect = this.checkSchema();
-        if(this.schemaIsCorrect){
+        if (this.schemaIsCorrect) {
             console.log("Schema is consistent throughout the file");
-        }
-        else{
+        } else {
             throw new Error("Schema is not consistent throughtout the file");
         }
     }
@@ -66,7 +65,7 @@ module.exports =  class Table {
         // Checks if schema is consistent through all file
         var correct = true;
         var i = 1;
-        while(i < this.table.length && correct){
+        while (i < this.table.length && correct) {
             var currentSchema = [];
             for (var j = 0; j < Object.keys(this.table[i]).length; j++) {
                 currentSchema.push(Object.keys(this.table[i])[j])
@@ -98,7 +97,7 @@ module.exports =  class Table {
         }
     }
 
-    toString(){
+    toString() {
         // Returns the table as a string
         var tableAsString = "";
         for (var i = 0; i < this.table.length; i++) {
@@ -113,21 +112,20 @@ module.exports =  class Table {
     }
 
 
-    insert(row){
+    insert(row) {
         // Given the object inserts it into the table and also adds it to the file
         var rowSchema = [];
-        for(var i = 0; i < Object.keys(row).length; i++){
+        for (var i = 0; i < Object.keys(row).length; i++) {
             rowSchema.push(Object.keys(row)[i]);
         }
         var rowSchemaCorrect = rowSchema.equals(this.schema);
-        if(rowSchemaCorrect){
+        if (rowSchemaCorrect) {
             this.table.push(row);
             let updatedTable = JSON.stringify(this.table);
-                fs.writeFile(this.filename, updatedTable, (err) => {
-                    if (err) console.log(err);
-                  });
-        }
-        else{
+            fs.writeFile(this.filename, updatedTable, (err) => {
+                if (err) console.log(err);
+            });
+        } else {
             console.warn("Input object is using wrong schema.\nFailed inserting into table.\nTable schema is: ");
             console.log(this.schema);
             console.warn("Your input object schema is: ");
@@ -135,7 +133,7 @@ module.exports =  class Table {
         }
     }
 
-    toHTML(){
+    toHTML() {
         // Writes table into a new html file for better visualization
         var html = "<!DOCTYPE html>\n";
         html += "<html>\n<head>\n<style>\n";
@@ -146,24 +144,24 @@ module.exports =  class Table {
         html += "</style>\n</head>\n<body>\n<h2>";
         html += this.name;
         html += "</h2>\n<table>\n<tr>";
-        for(var i = 0; i < this.schema.length; i++){
+        for (var i = 0; i < this.schema.length; i++) {
             let element = "<th>" + this.schema[i] + "</th>\n";
             html += element;
         }
         html += "</tr>\n";
-        for(i in this.table){
+        for (i in this.table) {
             html += "<tr>";
-            for(var j = 0; j <  Object.values(this.table[i]).length; j++){
+            for (var j = 0; j < Object.values(this.table[i]).length; j++) {
                 let element = "<th>" + Object.values(this.table[i])[j] + "</th>";
                 html += element;
             }
             html += "</tr>";
         }
-        html +="</table>\n</body>\n</html>"
-        fs.writeFile(this.name +".html", html, (err) => {
+        html += "</table>\n</body>\n</html>"
+        fs.writeFile(this.name + ".html", html, (err) => {
             if (err) console.warn(err);
             else console.log("HTML file of table created");
-          });
+        });
     }
 
     simpleSearch(column, value) {
@@ -180,8 +178,8 @@ module.exports =  class Table {
             console.warn("Value not found!");
         }
     }
-    
-    simpleSearchWithAttribute(column, value, attribute){
+
+    simpleSearchWithAttribute(column, value, attribute) {
         // Looks for rows that match and adds value of the attribute to return array
         var result = [];
         for (var i = 0; i < this.table.length; i++) {
@@ -196,4 +194,3 @@ module.exports =  class Table {
         }
     }
 };
-
