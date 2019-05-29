@@ -29,9 +29,9 @@ JSON array is a table and array item is a tuple.
     duplicateIndex: %{aray of row duplicate indeces}
 }``
 # Features to be added in next versions
-[ ] Complex querying
-[ ] Multiple-table support
-[ ] Adding user prompt to the script
+ [ ] Complex querying
+ [ ] Multiple-table support
+ [ ] Adding user prompt to the script
 
 # How to install and run
 JSQL is an npm package so just download it and run<br>
