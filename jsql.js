@@ -52,8 +52,18 @@ Object.prototype.equals = function (object) {
 Object.defineProperty(Object.prototype, "equals", {
     enumerable: false
 });
+// Code for checking if array is empty
+if (Array.prototype.isEmpty) {
+    console.warn("Overriding existing Array.prototype.isEmpty. Possible causes: New API defines the method, there's a framework conflict or you've got double inclusions in your code.");
+}
+Array.prototype.isEmpty = function (array) {
+    return this.length == 0;
+}
+Object.defineProperty(Array.prototype, "isEmpty", {
+    enumerable: false
+});
 
-// Function that converts CSV to JSON
+
 
 // Dependencies
 const jsonfile = require('jsonfile');
@@ -88,7 +98,7 @@ module.exports = class Table {
             throw new Error(`${filename} is not supported format`);
         }
         // Prints that table is initialized succes
-        if (this.table.length != 0) {
+        if (!this.table.isEmpty()) {
             console.log(`Table ${this.name} succesfully initialized from file ${this.filename}`);
         }
         // Creates table from first object in array
@@ -242,7 +252,7 @@ module.exports = class Table {
                 result.push(this.table[i]);
             }
         }
-        if (result.length != 0) {
+        if (!result.isEmpty()) {
             return result;
         } else {
             console.warn("Value not found!");
@@ -257,7 +267,7 @@ module.exports = class Table {
                 result.push(this.table[i][attribute]);
             }
         }
-        if (result.length != 0) {
+        if (!result.isEmpty()) {
             return result;
         } else {
             console.log("Value not found!");
@@ -305,11 +315,7 @@ module.exports = class Table {
                     y.item = this.table[x];
                     y.originalIndex = x;
                     y.duplicateIndex = [z];
-                    // if ((duplicates.length != 0) && (this.searchDuplicateArray(y.originalIndex, duplicates) != -1)) {
-                    //     duplicates[(this.searchDuplicateArray(y.originalIndex, duplicates))].duplicateIndex.push(z);
-                    // } else {
                         duplicates.push(y);
-                    //}
                 }
                 z++;
             }
