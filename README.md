@@ -20,21 +20,21 @@ JSON array is a table and array item is a tuple.
 * toHTML() - creates file %name.html for visualizing table
 * simpleSearch(column, value) - essentially same as `SELECT * FROM %name WHERE %column = %value`
 * simpleSearchWithAttributes(column, value, attribute) - essentialy same as `SELECT %sttribute FROM %name WHERE %column = %value`
-**Both search functions return array of results**
-*duplicateSearch() - returns specifically formatted array of all duplicates in the table
-**Duplicate Array is formatted in this way**
+**Both search functions return array of results** <br>
+*duplicateSearch() - returns specifically formatted array of all duplicates in the table<br>
+**Duplicate Array is formatted in this way**<br>
 ``{
     item: %row,
     originalIndex: %rowIndex,
     duplicateIndex: %{aray of row duplicate indeces}
 }``
 # Features to be added in next versions
-Complex querying
-Multiple-table support
-Adding user prompt to the script
+[]Complex querying
+[]Multiple-table support
+[]Adding user prompt to the script
 
 # How to install and run
-JSQL is an npm package so just download it and run
+JSQL is an npm package so just download it and run<br>
 ``npm install``
 and then look at test.js file for manual on how to use the library
 
