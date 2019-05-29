@@ -19,7 +19,7 @@ JSON array is a table and array item is a tuple.
 * insert(row) - inserts correctly formatted object row into the  table and table's json file
 * toHTML() - creates file %name.html for visualizing table
 * simpleSearch(column, value) - essentially same as `SELECT * FROM %name WHERE %column = %value`
-* simpleSearchWithAttributes(column, value, attribute) - essentialy same as `SELECT %sttribute FROM %name WHERE %column = %value`
+* simpleSearchWithAttributes(column, value, attribute) - essentialy same as `SELECT %sttribute FROM %name WHERE %column = %value`<br>
 **Both search functions return array of results** <br>
 *duplicateSearch() - returns specifically formatted array of all duplicates in the table<br>
 **Duplicate Array is formatted in this way**<br>
