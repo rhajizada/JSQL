@@ -1,0 +1,23 @@
+{
+  "name": "jsql",
+  "version": "0.0.3",
+  "description": "Library that allows user querying array of JSONs as if it was a SQL database",
+  "main": "jsql.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rhajizada/JSQL.git"
+  },
+  "author": "Rufat Hajizada",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rhajizada/JSQL/issues"
+  },
+  "homepage": "https://github.com/rhajizada/JSQL#readme",
+  "dependencies": {
+    "jsonfile": "^5.0.0"
+  }
+}

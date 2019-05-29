@@ -1,19 +1,9 @@
-let Table = require('./jsql');
-let table = new Table('price.csv', 'Price Indeces');
-// table.printSchema();
-// table.printTable();
-// let result = table.simpleSearch('Ping', 49);
-// let resultWithAttribute = table.simpleSearchWithAttribute('Date', '2017-11-16', 'ID');
-// console.log(result);
-// console.log(resultWithAttribute);
-// table.printTable();
-// table.printSchema();
-// console.log(table.toString());
-// console.dir(table.simpleSearch('Song', 'Dazed and Confused'));
-// table.insert(table.table[1]);
-// table.insert(table.table[2]);
-// console.dir(table.simpleSearch('Song', 'Babe I\'m Gonna Leave You'));
-// console.dir(table.duplicateSearch());
-// table.toCSV();
-table.toHTML();
-// table.printTable();
+/*
+    Use this file to test jsql library
+*/
+let Table = require('./jsql'); // Imports library from jsql.js as Table
+let led_zep = new Table('./Sample Data/songs.json', 'Led Zeppelin'); // creates a new table from songs.json file
+let price_index = new Table('./Sample Data/price-index.csv', 'Price Indeces'); // creates  a new table and converts to json from price-index.csv
+price_index.printSchema(); // Prints schema of price_index on console
+led_zep.toHTML(); // Creates html file called 'Led Zeppelin.html' from table for easier data visualization
+let price_index_string = price_index.toString(); // Returns price index table as a formatted string 

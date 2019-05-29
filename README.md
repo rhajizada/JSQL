@@ -10,21 +10,31 @@ JSQL loads an array of JSON's from the file you want to use and then using the w
 JSON array is a table and array item is a tuple.
 
 # Methods supported
-setTable() - sets a table from JSON file name
-printTable() - shows the table on the screen
-printSchema() - shows the table schema on the screen
-schema() - reteuns all the attributes of 
-search(a, x) - searches the table for tuple with attribute a equal to x and outputs on the screen
-
-
-
+constructor(filename,name) - constructs a  table from given file
+rename(name) - renames  the table
+checkSchema() - checks if the schema is consistent throughout the table
+printSchema() - prints the schema of table on the console
+print() - prints whole table on the console
+toString() - returns table as a formatted string
+insert(row) - inserts correctly formatted object row into the  table and table's json file
+toHTML() - creates file %name.html for visualizing table
+simpleSearch(column, value) - essentially same as `SELECT * FROM %name WHERE %column = %value`
+simpleSearchWithAttributes(column, value, attribute) - essentialy same as `SELECT %sttribute FROM %name WHERE %column = %value`
+Both search functions return array of results
+duplicateSearch() - returns specifically formatted array of all duplicates in the table
+Duplicate Array is formatted in this way
+``{
+    item: %row,
+    originalIndex: %rowIndex,
+    duplicateIndex: %{aray of row duplicate indeces}
+}``
 # Features to be added in next versions
 Complex querying
 Multiple-table support
-Table creation and insertion
 Adding user prompt to the script
 
 # How to install and run
-Make sure you have Node js and npm installed on the machine you want to run it on
-Install following npm libraries : fs and jsonfile
+JSQL is an npm package so just download it and run
+``npm install``
+and then look at test.js file for manual on how to use the library
 

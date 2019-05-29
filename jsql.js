@@ -126,7 +126,7 @@ module.exports = class Table {
         return correct;
     }
 
-    
+
     printSchema() {
         // Prints the table schema 
         console.log(this.name + " schema is:");
@@ -263,16 +263,60 @@ module.exports = class Table {
             console.log("Value not found!");
         }
     }
+
+    
     duplicateSearch() {
-        var duplicateTable = [];
-        for (var i = 0; i < this.table.length; i++) {
-            for (var j = i + 1; j < this.table.length; j++) {
-                if (this.table[i].equals(this.table[j])) {
-                    duplicateTable.push(this.table[j]);
+        // Looks for duplicates in table and returns array of duplicate objcets with original index and duplicate index
+        var format = (duplicateArray) => {
+            var i = 0;
+            while(i < duplicateArray.length){
+                var j = i+1;
+                while(j < duplicateArray.length){
+                    if(duplicateArray[i].duplicateIndex[0] == duplicateArray[j].originalIndex){
+                        duplicateArray[i].duplicateIndex.push(duplicateArray[j].duplicateIndex[0]); 
+                    }
+                    j++;
                 }
+                i++;
             }
+            i = 0;
+            while(i < duplicateArray.length){
+                j = i+1;
+                while(j < duplicateArray.length){
+                    if(duplicateArray[i] != undefined && duplicateArray[j] != undefined && duplicateArray[i].item.equals(duplicateArray[j].item)){
+                        duplicateArray[j] = undefined;
+                    }
+                    j++;
+                }
+                i++;
+            }
+            duplicateArray = duplicateArray.filter(function(value, index, arr){
+                return value != undefined;
+            })
+            return duplicateArray;
         }
-        console.log(`Duplicate table size: ${duplicateTable.length}`);
-        return duplicateTable;
+        var x = 0;
+        var duplicates = [];
+        while (x < this.table.length) {
+            var z = x + 1;
+            while (z < this.table.length) {
+                if (this.table[x].equals(this.table[z])) {
+                    var y = {};
+                    y.item = this.table[x];
+                    y.originalIndex = x;
+                    y.duplicateIndex = [z];
+                    // if ((duplicates.length != 0) && (this.searchDuplicateArray(y.originalIndex, duplicates) != -1)) {
+                    //     duplicates[(this.searchDuplicateArray(y.originalIndex, duplicates))].duplicateIndex.push(z);
+                    // } else {
+                        duplicates.push(y);
+                    //}
+                }
+                z++;
+            }
+            x++;
+        }
+        duplicates = format(duplicates);
+        return duplicates;
     }
+    
 };
