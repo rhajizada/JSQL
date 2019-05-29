@@ -1,5 +1,6 @@
 /*
     Use this file to test jsql library and how to use library
+    You  can use data in 'Sample Data'  folder to test the library
 */
 let Table = require('./jsql'); // Imports library from jsql.js as Table
 let led_zep = new Table('./Sample Data/songs.json', 'Led Zeppelin'); // creates a new table from songs.json file
