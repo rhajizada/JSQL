@@ -2,7 +2,7 @@
 if (Array.prototype.equals) {
     console.warn("Overriding existing Array.prototype.equals. Possible causes: New API defines the method, there's a framework conflict or you've got double inclusions in your code.");
 }
-// attach the .equals method to Array's prototype to call it on any array
+
 Array.prototype.equals = function (array) {
     // if the other array is a falsy value, return
     if (!array)
@@ -25,13 +25,13 @@ Array.prototype.equals = function (array) {
     }
     return true;
 }
-// Hide method from for-in loops
+
 Object.defineProperty(Array.prototype, "equals", {
     enumerable: false
 });
 //Code for comparing objects
 if (Object.prototype.equals) {
-    console.warn("Overriding existing Array.prototype.equals. Possible causes: New API defines the method, there's a framework conflict or you've got double inclusions in your code.");
+    console.warn("Overriding existing Object.prototype.equals. Possible causes: New API defines the method, there's a framework conflict or you've got double inclusions in your code.");
 }
 
 Object.prototype.equals = function (object) {
@@ -52,18 +52,38 @@ Object.prototype.equals = function (object) {
 Object.defineProperty(Object.prototype, "equals", {
     enumerable: false
 });
+// Code for converting object to string
+if (Object.prototype.toString) {
+    console.warn("Overriding existing Object.prototype.toString. Possible causes: New API defines the method, there's a framework conflict or you've got double inclusions in your code.");
+}
+
+Object.prototype.toString = function () {
+    var string = "";
+    for (var i in Object.values(this)) {
+        if (i != this.length - 1) {
+            string += `${Object.values(this)[i]} `;
+        } else {
+            string += `${Object.values(this)[i]}`;
+        }
+    }
+    return string;
+}
+
+Object.defineProperty(Object.prototype, "toString", {
+    enumerable: false
+});
+
+
 // Code for checking if array is empty
 if (Array.prototype.isEmpty) {
     console.warn("Overriding existing Array.prototype.isEmpty. Possible causes: New API defines the method, there's a framework conflict or you've got double inclusions in your code.");
 }
-Array.prototype.isEmpty = function (array) {
+Array.prototype.isEmpty = function () {
     return this.length == 0;
 }
 Object.defineProperty(Array.prototype, "isEmpty", {
     enumerable: false
 });
-
-
 
 // Dependencies
 const jsonfile = require('jsonfile');
@@ -81,7 +101,7 @@ module.exports = class Table {
             this.table = csv2json(filename);
             this.isCSV = true;
             this.filename = filename.split('.csv')[0] + '.json';
-            fs.writeFile(this.filename, JSON.stringify(this.table), (err) => {
+            fs.writeFileSync(this.filename, JSON.stringify(this.table), (err) => {
                 if (err) console.log(err);
             });
             console.log(`Converted ${filename} to  JSON format and stored it as ${this.filename}`);
@@ -136,7 +156,6 @@ module.exports = class Table {
         return correct;
     }
 
-
     printSchema() {
         // Prints the table schema 
         console.log(this.name + " schema is:");
@@ -182,8 +201,11 @@ module.exports = class Table {
         if (rowSchemaCorrect) {
             this.table.push(row);
             let updatedTable = JSON.stringify(this.table);
-            fs.writeFile(this.filename, updatedTable, (err) => {
+            fs.writeFileSync(this.filename, updatedTable, (err) => {
                 if (err) console.log(err);
+                else{
+                    console.log(`${this.filename} updated`);
+                }
             });
             console.log(`Succesfully inserted ${JSON.stringify(row)}`);
         } else {
@@ -238,7 +260,7 @@ module.exports = class Table {
         html += `</table>
                  </body>
                  </html>`;
-        fs.writeFile(this.name + ".html", html, (err) => {
+        fs.writeFileSync(this.name + ".html", html, (err) => {
             if (err) console.warn(err);
             else console.log("HTML file of table created");
         });
@@ -250,6 +272,21 @@ module.exports = class Table {
         for (var i = 0; i < this.table.length; i++) {
             if (this.table[i][column] == value) {
                 result.push(this.table[i]);
+            }
+        }
+        if (!result.isEmpty()) {
+            return result;
+        } else {
+            console.warn("Value not found!");
+        }
+    }
+
+    returnIndices(column, value) {
+        // Looks for rows that match and adds them to return array of indices 
+        var result = [];
+        for (var i = 0; i < this.table.length; i++) {
+            if (this.table[i][column] == value) {
+                result.push(i);
             }
         }
         if (!result.isEmpty()) {
@@ -274,33 +311,32 @@ module.exports = class Table {
         }
     }
 
-    
     duplicateSearch() {
         // Looks for duplicates in table and returns array of duplicate objcets with original index and duplicate index
         var format = (duplicateArray) => {
             var i = 0;
-            while(i < duplicateArray.length){
-                var j = i+1;
-                while(j < duplicateArray.length){
-                    if(duplicateArray[i].duplicateIndex[0] == duplicateArray[j].originalIndex){
-                        duplicateArray[i].duplicateIndex.push(duplicateArray[j].duplicateIndex[0]); 
+            while (i < duplicateArray.length) {
+                var j = i + 1;
+                while (j < duplicateArray.length) {
+                    if (duplicateArray[i].duplicateIndex[0] == duplicateArray[j].originalIndex) {
+                        duplicateArray[i].duplicateIndex.push(duplicateArray[j].duplicateIndex[0]);
                     }
                     j++;
                 }
                 i++;
             }
             i = 0;
-            while(i < duplicateArray.length){
-                j = i+1;
-                while(j < duplicateArray.length){
-                    if(duplicateArray[i] != undefined && duplicateArray[j] != undefined && duplicateArray[i].item.equals(duplicateArray[j].item)){
+            while (i < duplicateArray.length) {
+                j = i + 1;
+                while (j < duplicateArray.length) {
+                    if (duplicateArray[i] != undefined && duplicateArray[j] != undefined && duplicateArray[i].item.equals(duplicateArray[j].item)) {
                         duplicateArray[j] = undefined;
                     }
                     j++;
                 }
                 i++;
             }
-            duplicateArray = duplicateArray.filter(function(value, index, arr){
+            duplicateArray = duplicateArray.filter(function (value, index, arr) {
                 return value != undefined;
             })
             return duplicateArray;
@@ -315,7 +351,7 @@ module.exports = class Table {
                     y.item = this.table[x];
                     y.originalIndex = x;
                     y.duplicateIndex = [z];
-                        duplicates.push(y);
+                    duplicates.push(y);
                 }
                 z++;
             }
@@ -324,5 +360,39 @@ module.exports = class Table {
         duplicates = format(duplicates);
         return duplicates;
     }
-    
+
+    // removeDuplicates() {
+    //     // Removes duplicates from table
+    //     let duplicateArray = this.duplicateSearch();
+    //     for (var i in duplicateArray) {
+    //         for (var j in duplicateArray[i].duplicateIndex) {
+    //             this.removeByIndex(duplicateArray[i].duplicateIndex[j]);
+    //         }
+    //     }
+    // }
+
+    removeByIndex(index) {
+        // Removes element from array by index
+        let removed = this.table.splice(index, 1);
+        let updatedTable = JSON.stringify(this.table);
+        fs.writeFileSync(this.filename, updatedTable, (err) => {
+                if (err) console.log(err);
+                else{
+                    console.log(`${this.filename} updated`);
+                }
+        });
+        console.log(`Succesfully removed item ${removed.toString()} from ${this.name}`);
+    }
+
+    // removeByAttribute(column, value) {
+    //     // Removes items that match the criteria column[] = value
+    //     let result = this.returnIndices(column, value);
+    //     for (var i in result) {
+    //         this.removeByIndex(result[i]);
+    //     }
+    // }
+
+
+
+
 };
