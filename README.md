@@ -10,19 +10,19 @@ JSQL loads an array of JSON's from the file you want to use and then using the w
 JSON array is a table and array item is a tuple.
 
 # Methods supported
-constructor(filename,name) - constructs a  table from given file
-rename(name) - renames  the table
-checkSchema() - checks if the schema is consistent throughout the table
-printSchema() - prints the schema of table on the console
-print() - prints whole table on the console
-toString() - returns table as a formatted string
-insert(row) - inserts correctly formatted object row into the  table and table's json file
-toHTML() - creates file %name.html for visualizing table
-simpleSearch(column, value) - essentially same as `SELECT * FROM %name WHERE %column = %value`
-simpleSearchWithAttributes(column, value, attribute) - essentialy same as `SELECT %sttribute FROM %name WHERE %column = %value`
-Both search functions return array of results
-duplicateSearch() - returns specifically formatted array of all duplicates in the table
-Duplicate Array is formatted in this way
+* constructor(filename,name) - constructs a  table from given file
+* rename(name) - renames  the table
+* checkSchema() - checks if the schema is consistent throughout the table
+* printSchema() - prints the schema of table on the console
+* print() - prints whole table on the console
+* toString() - returns table as a formatted string
+* insert(row) - inserts correctly formatted object row into the  table and table's json file
+* toHTML() - creates file %name.html for visualizing table
+* simpleSearch(column, value) - essentially same as `SELECT * FROM %name WHERE %column = %value`
+* simpleSearchWithAttributes(column, value, attribute) - essentialy same as `SELECT %sttribute FROM %name WHERE %column = %value`
+**Both search functions return array of results**
+*duplicateSearch() - returns specifically formatted array of all duplicates in the table
+**Duplicate Array is formatted in this way**
 ``{
     item: %row,
     originalIndex: %rowIndex,
