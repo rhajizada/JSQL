@@ -2,7 +2,6 @@
 if (Array.prototype.equals) {
     console.warn("Overriding existing Array.prototype.equals. Possible causes: New API defines the method, there's a framework conflict or you've got double inclusions in your code.");
 }
-
 Array.prototype.equals = function (array) {
     // if the other array is a falsy value, return
     if (!array)
@@ -25,15 +24,14 @@ Array.prototype.equals = function (array) {
     }
     return true;
 }
-
 Object.defineProperty(Array.prototype, "equals", {
     enumerable: false
 });
+
 //Code for comparing objects
 if (Object.prototype.equals) {
     console.warn("Overriding existing Object.prototype.equals. Possible causes: New API defines the method, there's a framework conflict or you've got double inclusions in your code.");
 }
-
 Object.prototype.equals = function (object) {
     if (!object) {
         return false;
@@ -48,15 +46,14 @@ Object.prototype.equals = function (object) {
     }
     return true;
 }
-
 Object.defineProperty(Object.prototype, "equals", {
     enumerable: false
 });
+
 // Code for converting object to string
 if (Object.prototype.toString) {
     console.warn("Overriding existing Object.prototype.toString. Possible causes: New API defines the method, there's a framework conflict or you've got double inclusions in your code.");
 }
-
 Object.prototype.toString = function () {
     var string = "";
     for (var i in Object.values(this)) {
@@ -68,11 +65,9 @@ Object.prototype.toString = function () {
     }
     return string;
 }
-
 Object.defineProperty(Object.prototype, "toString", {
     enumerable: false
 });
-
 
 // Code for checking if array is empty
 if (Array.prototype.isEmpty) {
@@ -171,7 +166,12 @@ module.exports = class Table {
         for (var i = 0; i < this.table.length; i++) {
             var tuple = "";
             for (var j = 0; j < this.schema.length; j++) {
-                tuple += this.table[i][this.schema[j]] + "\t";
+                if (this.table[i] != undefined && this.table[i] != null) {
+                    tuple += this.table[i][this.schema[j]] + "\t";
+                }
+                else{
+                    tuple = this.table[i];
+                }
             }
             console.log(tuple);
         }
@@ -203,7 +203,7 @@ module.exports = class Table {
             let updatedTable = JSON.stringify(this.table);
             fs.writeFileSync(this.filename, updatedTable, (err) => {
                 if (err) console.log(err);
-                else{
+                else {
                     console.log(`${this.filename} updated`);
                 }
             });
@@ -346,7 +346,7 @@ module.exports = class Table {
         while (x < this.table.length) {
             var z = x + 1;
             while (z < this.table.length) {
-                if (this.table[x].equals(this.table[z])) {
+                if (this.table[x] != undefined && this.table[x] != undefined && this.table[x].equals(this.table[z])) {
                     var y = {};
                     y.item = this.table[x];
                     y.originalIndex = x;
@@ -361,38 +361,87 @@ module.exports = class Table {
         return duplicates;
     }
 
-    // removeDuplicates() {
-    //     // Removes duplicates from table
-    //     let duplicateArray = this.duplicateSearch();
-    //     for (var i in duplicateArray) {
-    //         for (var j in duplicateArray[i].duplicateIndex) {
-    //             this.removeByIndex(duplicateArray[i].duplicateIndex[j]);
-    //         }
-    //     }
-    // }
-
-    removeByIndex(index) {
-        // Removes element from array by index
-        let removed = this.table.splice(index, 1);
+    removeDuplicates() {
+        // Removes duplicates from array
+        let duplicateArray = this.duplicateSearch();
+        var duplicateIndeces = [];
+        for (var i in duplicateArray) {
+            for (var j in duplicateArray[i].duplicateIndex) {
+                duplicateIndeces.push(duplicateArray[i].duplicateIndex[j]);
+            }
+        }
+        for (var i in duplicateIndeces) {
+            for (var j in this.table) {
+                if (duplicateIndeces[i] == j) {
+                    console.log(`Succesfully removed ${this.table[j].toString()}`);
+                    this.table[j] = undefined
+                }
+            }
+        }
+        for (var i in this.table) {
+            if (this.table[i] == undefined || this.table[i] == null) {
+                this.table.splice(i, 1);
+            }
+        }
+        for (var i in this.table) {
+            if (this.table[i] == undefined || this.table[i] == null) {
+                this.table.splice(i, 1);
+            }
+        }
         let updatedTable = JSON.stringify(this.table);
         fs.writeFileSync(this.filename, updatedTable, (err) => {
-                if (err) console.log(err);
-                else{
-                    console.log(`${this.filename} updated`);
-                }
+            if (err) console.log(err);
+            else {
+                console.log(`${this.filename} updated`);
+            }
         });
-        console.log(`Succesfully removed item ${removed.toString()} from ${this.name}`);
+        console.log(`Succesfully removed duplicates from ${this.name}`)
     }
 
-    // removeByAttribute(column, value) {
-    //     // Removes items that match the criteria column[] = value
-    //     let result = this.returnIndices(column, value);
-    //     for (var i in result) {
-    //         this.removeByIndex(result[i]);
-    //     }
-    // }
+    removeByIndex(index) {
+        if (index > this.table.length) {
+            console.warn(`Index exceed ${this.name}'s size`);
+        } else {
+            // Removes element from array by index
+            let removed = this.table.splice(index, 1);
+            let updatedTable = JSON.stringify(this.table);
+            fs.writeFileSync(this.filename, updatedTable, (err) => {
+                if (err) console.log(err);
+                else {
+                    console.log(`${this.filename} updated`);
+                }
+            });
+            console.log(`Succesfully removed item ${removed.toString()} from ${this.name}`);
+        }
+    }
 
-
-
-
+    removeByAttribute(column, value) {
+        // Removes all the elements that match column = value
+        let result = this.returnIndices(column, value);
+        for (var i in result) {
+            for (var j in this.table) {
+                if (result[i] == j) {
+                    console.log(`Succesfully removed ${this.table[j].toString()}`);
+                    this.table[j] = undefined
+                }
+            }
+        }
+        for (var i in this.table) {
+            if (this.table[i] == undefined || this.table[i] == null) {
+                this.table.splice(i, 1);
+            }
+        }
+        for (var i in this.table) {
+            if (this.table[i] == undefined || this.table[i] == null) {
+                this.table.splice(i, 1);
+            }
+        }
+        let updatedTable = JSON.stringify(this.table);
+        fs.writeFileSync(this.filename, updatedTable, (err) => {
+            if (err) console.log(err);
+            else {
+                console.log(`${this.filename} updated`);
+            }
+        });
+    }
 };
