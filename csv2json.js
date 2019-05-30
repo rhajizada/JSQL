@@ -3,45 +3,47 @@
  */
 const fs = require('fs');
 module.exports = function  csv2json(filename){
-    var array = csv2array(filename);
-    var schemaPrototype = array[0];
-    var schema = [];
-    for(var i in schemaPrototype[0]){
+    let i;
+    const array = csv2array(filename);
+    const schemaPrototype = array[0];
+    const schema = [];
+    for(i in schemaPrototype[0]){
         schema.push(schemaPrototype[0][i]);
     }
-    var jsonArray = [];
-    for (var i = 1; i < array.length; i++) {
-        var object = {};
-        for (var j = 0; j < array[i][0].length; j++) {
+    const jsonArray = [];
+    for (i = 1; i < array.length; i++) {
+        const object = {};
+        for (let j = 0; j < array[i][0].length; j++) {
             object[schema[j]] = array[i][0][j];
         }
         jsonArray.push(object);
     }
     return jsonArray;
-}
+};
 function csv2array(filename){
     let csv = fs.readFileSync(filename, 'utf-8').match(/^.+$/gm);
-    var thing = [];
-    for(var i in csv){
+    const thing = [];
+    for(let i in csv){
         thing.push(line2array(csv[i]));
     }
     return thing;
 }
 
 function line2array( strData, strDelimiter ){
+    let strMatchedValue;
     strDelimiter = (strDelimiter || ",");
-    var objPattern = new RegExp(
+    const objPattern = new RegExp(
         (
             "(\\" + strDelimiter + "|\\r?\\n|\\r|^)" +
             "(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" +
             "([^\"\\" + strDelimiter + "\\r\\n]*))"
         ),
         "gi"
-        );
-    var arrData = [[]];
-    var arrMatches = null;
+    );
+    const arrData = [[]];
+    let arrMatches = null;
     while (arrMatches = objPattern.exec( strData )){
-        var strMatchedDelimiter = arrMatches[ 1 ];
+        const strMatchedDelimiter = arrMatches[1];
         if (
             strMatchedDelimiter.length &&
             (strMatchedDelimiter != strDelimiter)
@@ -49,12 +51,12 @@ function line2array( strData, strDelimiter ){
             arrData.push( [] );
         }
         if (arrMatches[ 2 ]){
-            var strMatchedValue = arrMatches[ 2 ].replace(
+            strMatchedValue = arrMatches[ 2 ].replace(
                 new RegExp( "\"\"", "g" ),
                 "\""
                 );
         } else {
-            var strMatchedValue = arrMatches[ 3 ];
+            strMatchedValue = arrMatches[3];
         }
         arrData[ arrData.length - 1 ].push( strMatchedValue );
     }

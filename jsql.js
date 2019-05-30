@@ -1,5 +1,5 @@
 /*
-    Code below adds exrension functions for Object and Array
+    Code below adds extension functions for Object and Array
     Object.equals(object) Object.toString() Array.equals(array) Array.isEmpty()
  */
 
@@ -16,7 +16,9 @@ Array.prototype.equals = function (array) {
     if (this.length != array.length)
         return false;
 
-    for (var i = 0, l = this.length; i < l; i++) {
+    let i = 0;
+    const l = this.length;
+    for (; i < l; i++) {
         // Check if we have nested arrays
         if (this[i] instanceof Array && array[i] instanceof Array) {
             // recurse into the nested arrays
@@ -28,7 +30,7 @@ Array.prototype.equals = function (array) {
         }
     }
     return true;
-}
+};
 Object.defineProperty(Array.prototype, "equals", {
     enumerable: false
 });
@@ -41,7 +43,7 @@ Array.prototype.clean = function () {
         return e != null;
     }));
 
-}
+};
 Object.defineProperty(Array.prototype, "clean", {
     enumerable: false
 });
@@ -56,13 +58,13 @@ Object.prototype.equals = function (object) {
     if (Object.keys(this).length != Object.keys(object).length) {
         return false;
     }
-    for (i in Object.keys(this)) {
+    for (let i in Object.keys(this)) {
         if (this[Object.keys(this)[i]] != object[Object.keys(this)[i]]) {
             return false;
         }
     }
     return true;
-}
+};
 Object.defineProperty(Object.prototype, "equals", {
     enumerable: false
 });
@@ -71,8 +73,8 @@ if (Object.prototype.toString) {
     console.warn("Overriding existing Object.prototype.toString. Possible causes: New API defines the method, there's a framework conflict or you've got double inclusions in your code.");
 }
 Object.prototype.toString = function () {
-    var string = "";
-    for (var i in Object.values(this)) {
+    let string = "";
+    for (let i in Object.values(this)) {
         if (i != this.length - 1) {
             string += `${Object.values(this)[i]} `;
         } else {
@@ -80,7 +82,7 @@ Object.prototype.toString = function () {
         }
     }
     return string;
-}
+};
 Object.defineProperty(Object.prototype, "toString", {
     enumerable: false
 });
@@ -90,7 +92,7 @@ if (Array.prototype.isEmpty) {
 }
 Array.prototype.isEmpty = function () {
     return this.length == 0;
-}
+};
 Object.defineProperty(Array.prototype, "isEmpty", {
     enumerable: false
 });
@@ -134,13 +136,13 @@ module.exports = class Table {
             this.isCSV = false;
             throw new Error(`${filename} is not supported format`);
         }
-        // Prints that table is initialized succes
+        // Prints that table is initialized success
         if (!this.table.isEmpty()) {
-            console.log(`Table ${this.name} succesfully initialized from file ${this.filename}`);
+            console.log(`Table ${this.name} successfully initialized from file ${this.filename}`);
         }
         // Creates table from first object in array
         this.schema = [];
-        for (var i = 0; i < Object.keys(this.table[0]).length; i++) {
+        for (let i = 0; i < Object.keys(this.table[0]).length; i++) {
             this.schema.push(Object.keys(this.table[0])[i]);
         }
         // Checks correctness of schema
@@ -148,7 +150,7 @@ module.exports = class Table {
         if (this.schemaIsCorrect) {
             console.log("Schema is consistent throughout the file");
         } else {
-            throw new Error("Schema is not consistent throughtout the file");
+            throw new Error("Schema is not consistent throughout the file");
         }
     }
 
@@ -160,14 +162,14 @@ module.exports = class Table {
 
     checkSchema() {
         // Checks if schema is consistent through all file
-        var correct = true;
-        var i = 1;
+        let correct = true;
+        let i = 1;
         while (i < this.table.length && correct) {
-            var currentSchema = [];
-            for (var j = 0; j < Object.keys(this.table[i]).length; j++) {
+            const currentSchema = [];
+            for (let j = 0; j < Object.keys(this.table[i]).length; j++) {
                 currentSchema.push(Object.keys(this.table[i])[j])
             }
-            correct = this.schema.equals(currentSchema)
+            correct = this.schema.equals(currentSchema);
             i++;
         }
         return correct;
@@ -176,8 +178,8 @@ module.exports = class Table {
     printSchema() {
         // Prints the table schema 
         console.log(this.name + " schema is:");
-        var schema = '';
-        for (var i = 0; i < Object.keys(this.table[0]).length; i++) {
+        let schema = '';
+        for (let i = 0; i < Object.keys(this.table[0]).length; i++) {
             schema = schema + Object.keys(this.table[0])[i] + "\t";
         }
         console.log(schema);
@@ -190,10 +192,10 @@ module.exports = class Table {
 
     toString() {
         // Returns the table as a string
-        var tableAsString = "";
-        for (var i = 0; i < this.table.length; i++) {
-            var tuple = "";
-            for (var j = 0; j < this.schema.length; j++) {
+        let tableAsString = "";
+        for (let i = 0; i < this.table.length; i++) {
+            let tuple = "";
+            for (let j = 0; j < this.schema.length; j++) {
                 tuple += this.table[i][this.schema[j]] + "\t";
             }
             tableAsString += tuple;
@@ -204,11 +206,11 @@ module.exports = class Table {
 
     insert(row) {
         // Given the object inserts it into the table and also adds it to the file
-        var rowSchema = [];
-        for (var i = 0; i < Object.keys(row).length; i++) {
+        const rowSchema = [];
+        for (let i = 0; i < Object.keys(row).length; i++) {
             rowSchema.push(Object.keys(row)[i]);
         }
-        var rowSchemaCorrect = rowSchema.equals(this.schema);
+        const rowSchemaCorrect = rowSchema.equals(this.schema);
         if (rowSchemaCorrect) {
             this.table.push(row);
             let updatedTable = JSON.stringify(this.table);
@@ -218,7 +220,7 @@ module.exports = class Table {
                     console.log(`${this.filename} updated`);
                 }
             });
-            console.log(`Succesfully inserted ${JSON.stringify(row)}`);
+            console.log(`Successfully inserted ${JSON.stringify(row)}`);
         } else {
             console.warn("Input object is using wrong schema.\nFailed inserting into table.\nTable schema is: ");
             console.log(this.schema);
@@ -228,9 +230,11 @@ module.exports = class Table {
     }
 
     toHTML() {
-        // Writes table into a new html file for better visualization
-        var html = `<!DOCTYPE html>
-            <html>
+        let i;
+// Writes table into a new html file for better visualization
+        let html = `<!DOCTYPE html>
+            <html lang="en">
+            <title>${this.name}</title>
             <head>
             <style>
                 table {
@@ -241,8 +245,6 @@ module.exports = class Table {
                 }
                 td, th {
                     border: 1px solid #dddddd;
-                    text-align: center;
-                    text-align: left;
                     padding: 8px;
                 }
                 tr:nth-child(even) {
@@ -257,13 +259,13 @@ module.exports = class Table {
             <h2>${this.name}</h2>
             <table>
             <tr>`;
-        for (var i = 0; i < this.schema.length; i++) {
+        for (i = 0; i < this.schema.length; i++) {
             html += `<th>${this.schema[i]}</th>\n`;
         }
         html += "</tr>\n";
         for (i in this.table) {
             html += "<tr>\n";
-            for (var j = 0; j < Object.values(this.table[i]).length; j++) {
+            for (let j = 0; j < Object.values(this.table[i]).length; j++) {
                 html += `<th>${Object.values(this.table[i])[j]}</th>`;
             }
             html += "</tr>\n";
@@ -278,15 +280,17 @@ module.exports = class Table {
     }
 
     toCSV(){
-        var newFileName = '';
+        let i;
+        let newFileName = '';
         if(this.isCSV){
             newFileName = this.csvName;
         }
         else{
             newFileName = this.filename.split('.json')[0] + '.csv';
         }
-        var csv = '';
-        for(var i  in this.schema){
+        let csv = '';
+        // noinspection Annotator
+        for(i  in this.schema){
             if(i != this.schema.length - 1) {
                 csv +=  `${this.schema[i]},`
             }
@@ -295,8 +299,9 @@ module.exports = class Table {
             }
         }
         csv += '\n';
-        for(var i in this.table){
-            for(var j in Object.values(this.table[i])){
+        // noinspection Annotator
+        for(i in this.table){
+            for(let j in Object.values(this.table[i])){
                 if(j != Object.values(this.table[i]).length - 1){
                     csv += `${Object.values(this.table[i])[j]},`
                 }
@@ -314,7 +319,7 @@ module.exports = class Table {
                 console.log(`${this.filename} updated`);
             }
         });
-        var consoleMessage = "";
+        let consoleMessage = "";
         if(this.isCSV){
             consoleMessage = `Updated ${this.csvName}`;
         }
@@ -326,8 +331,8 @@ module.exports = class Table {
 
     simpleSearch(column, value) {
         // Looks for rows that match and adds them to return array of objects
-        var result = [];
-        for (var i = 0; i < this.table.length; i++) {
+        const result = [];
+        for (let i = 0; i < this.table.length; i++) {
             if (this.table[i][column] == value) {
                 result.push(this.table[i]);
             }
@@ -341,8 +346,8 @@ module.exports = class Table {
 
     returnIndices(column, value) {
         // Looks for rows that match and adds them to return array of indices 
-        var result = [];
-        for (var i = 0; i < this.table.length; i++) {
+        const result = [];
+        for (let i = 0; i < this.table.length; i++) {
             if (this.table[i][column] == value) {
                 result.push(i);
             }
@@ -356,8 +361,8 @@ module.exports = class Table {
 
     simpleSearchWithAttribute(column, value, attribute) {
         // Looks for rows that match and adds value of the attribute to return array
-        var result = [];
-        for (var i = 0; i < this.table.length; i++) {
+        const result = [];
+        for (let i = 0; i < this.table.length; i++) {
             if (this.table[i][column] == value) {
                 result.push(this.table[i][attribute]);
             }
@@ -370,9 +375,9 @@ module.exports = class Table {
     }
 
     duplicateSearch() {
-        // Looks for duplicates in table and returns array of duplicate objcets with original index and duplicate indeces
-        var format = (duplicateArray) => {
-            var i = 0;
+        // Looks for duplicates in table and returns array of duplicate objects with original index and duplicate indices
+        const format = (duplicateArray) => {
+            let i = 0;
             while (i < duplicateArray.length) {
                 var j = i + 1;
                 while (j < duplicateArray.length) {
@@ -396,16 +401,16 @@ module.exports = class Table {
             }
             duplicateArray = duplicateArray.filter(function (value, index, arr) {
                 return value != undefined;
-            })
+            });
             return duplicateArray;
-        }
-        var x = 0;
-        var duplicates = [];
+        };
+        let x = 0;
+        let duplicates = [];
         while (x < this.table.length) {
-            var z = x + 1;
+            let z = x + 1;
             while (z < this.table.length) {
                 if (this.table[x] != undefined && this.table[x] != undefined && this.table[x].equals(this.table[z])) {
-                    var y = {};
+                    const y = {};
                     y.item = this.table[x];
                     y.originalIndex = x;
                     y.duplicateIndex = [z];
@@ -420,18 +425,24 @@ module.exports = class Table {
     }
 
     removeDuplicates() {
-        // Removes duplicates from table
+        let j;
+        let i;
+// Removes duplicates from table
         let duplicateArray = this.duplicateSearch();
-        var duplicateIndeces = [];
-        for (var i in duplicateArray) {
-            for (var j in duplicateArray[i].duplicateIndex) {
-                duplicateIndeces.push(duplicateArray[i].duplicateIndex[j]);
+        const duplicateIndices = [];
+        // noinspection Annotator
+        for (i in duplicateArray) {
+            // noinspection Annotator
+            for (j in duplicateArray[i].duplicateIndex) {
+                duplicateIndices.push(duplicateArray[i].duplicateIndex[j]);
             }
         }
-        for (var i in duplicateIndeces) {
-            for (var j in this.table) {
-                if (duplicateIndeces[i] == j) {
-                    console.log(`Succesfully removed ${this.table[j].toString()}`);
+        // noinspection Annotator
+        for (i in duplicateIndices) {
+            // noinspection Annotator
+            for (j in this.table) {
+                if (duplicateIndices[i] == j) {
+                    console.log(`Successfully removed ${this.table[j].toString()}`);
                     this.table[j] = undefined
                 }
             }
@@ -444,7 +455,7 @@ module.exports = class Table {
                 console.log(`${this.filename} updated`);
             }
         });
-        console.log(`Succesfully removed duplicates from ${this.name}`)
+        console.log(`Successfully removed duplicates from ${this.name}`)
     }
 
     removeByIndex(index) {
@@ -461,17 +472,17 @@ module.exports = class Table {
                     console.log(`${this.filename} updated`);
                 }
             });
-            console.log(`Succesfully removed item ${removed.toString()} from ${this.name}`);
+            console.log(`Successfully removed item ${removed.toString()} from ${this.name}`);
         }
     }
 
     removeByAttribute(column, value) {
         // Removes all the elements that match column = value from table
         let result = this.returnIndices(column, value);
-        for (var i in result) {
-            for (var j in this.table) {
+        for (let i in result) {
+            for (let j in this.table) {
                 if (result[i] == j) {
-                    console.log(`Succesfully removed ${this.table[j].toString()}`);
+                    console.log(`Successfully removed ${this.table[j].toString()}`);
                     this.table[j] = undefined
                 }
             }

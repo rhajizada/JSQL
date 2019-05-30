@@ -4,6 +4,6 @@
  */
 const fs = require('fs');
 module.exports = function file2json(filename){
-        let json= fs.readFileSync(filename, 'utf-8')
+        let json= fs.readFileSync(filename, 'utf-8');
         return JSON.parse(json);
-}
+};
