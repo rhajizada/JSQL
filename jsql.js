@@ -116,6 +116,7 @@ module.exports = class Table {
             // Converts CSV to JSON file and stores it
             this.table = csv2json(filename);
             this.isCSV = true;
+            this.csvName = this.filename;
             this.filename = filename.split('.csv')[0] + '.json';
             fs.writeFileSync(this.filename, JSON.stringify(this.table), (err) => {
                 if (err) console.log(err);
@@ -274,6 +275,53 @@ module.exports = class Table {
             if (err) console.warn(err);
             else console.log("HTML file of table created");
         });
+    }
+
+    toCSV(){
+        var newFileName = '';
+        if(this.isCSV){
+            newFileName = this.csvName;
+        }
+        else{
+            newFileName = this.filename.split('.json')[0] + '.csv';
+        }
+        var csv = '';
+        for(var i  in this.schema){
+            if(i != this.schema.length - 1) {
+                csv +=  `${this.schema[i]},`
+            }
+            else {
+                csv += `${this.schema[i]}`
+            }
+        }
+        csv += '\n';
+        for(var i in this.table){
+            for(var j in Object.values(this.table[i])){
+                if(j != Object.values(this.table[i]).length - 1){
+                    csv += `${Object.values(this.table[i])[j]},`
+                }
+                else{
+                    csv += `${Object.values(this.table[i])[j]}`;
+                }
+            }
+            if(i != this.table.length - 1) {
+                csv += '\n';
+            }
+        }
+        fs.writeFileSync(newFileName, csv, (err) => {
+            if (err) console.log(err);
+            else {
+                console.log(`${this.filename} updated`);
+            }
+        });
+        var consoleMessage = "";
+        if(this.isCSV){
+            consoleMessage = `Updated ${this.csvName}`;
+        }
+        else{
+            consoleMessage = `Converted ${this.filename} to CSV and created ${newFileName}`;
+        }
+        console.log(consoleMessage);
     }
 
     simpleSearch(column, value) {

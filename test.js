@@ -32,6 +32,6 @@ led_zep.insert(led_zep.table[0]); // Generating  another duplicate
 console.log("Showing duplicate array: ");
 console.dir(duplicates); // Shows duplicates
 led_zep.removeByAttribute('Song', 'Stairway to Heaven'); // removing item by attribute
-
 led_zep.removeDuplicates(); // removing duplicates from table
 led_zep.print(); // print table on the console using console.table()
+led_zep.toCSV();
