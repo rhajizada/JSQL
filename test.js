@@ -31,4 +31,4 @@ led_zep.removeByIndex(10); // Removing first duplicate by index
 led_zep.insert(led_zep.table[0]); // Generating  another duplicate
 led_zep.removeByAttribute('Song', 'Stairway to Heaven'); // removing item by attribute
 led_zep.removeDuplicates(); // removing duplicates from table
-led_zep.print();
+led_zep.print(); // print table on the console using console.table()

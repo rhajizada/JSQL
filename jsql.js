@@ -162,19 +162,7 @@ module.exports = class Table {
     }
 
     print() {
-        // Prints the whole table on the console
-        for (var i = 0; i < this.table.length; i++) {
-            var tuple = "";
-            for (var j = 0; j < this.schema.length; j++) {
-                if (this.table[i] != undefined && this.table[i] != null) {
-                    tuple += this.table[i][this.schema[j]] + "\t";
-                }
-                else{
-                    tuple = this.table[i];
-                }
-            }
-            console.log(tuple);
-        }
+        console.table(this.table);
     }
 
     toString() {
@@ -378,16 +366,9 @@ module.exports = class Table {
                 }
             }
         }
-        for (var i in this.table) {
-            if (this.table[i] == undefined || this.table[i] == null) {
-                this.table.splice(i, 1);
-            }
-        }
-        for (var i in this.table) {
-            if (this.table[i] == undefined || this.table[i] == null) {
-                this.table.splice(i, 1);
-            }
-        }
+        this.table = this.table.filter(function (e) {
+            return e != null;
+        });
         let updatedTable = JSON.stringify(this.table);
         fs.writeFileSync(this.filename, updatedTable, (err) => {
             if (err) console.log(err);
@@ -426,16 +407,9 @@ module.exports = class Table {
                 }
             }
         }
-        for (var i in this.table) {
-            if (this.table[i] == undefined || this.table[i] == null) {
-                this.table.splice(i, 1);
-            }
-        }
-        for (var i in this.table) {
-            if (this.table[i] == undefined || this.table[i] == null) {
-                this.table.splice(i, 1);
-            }
-        }
+        this.table = this.table.filter(function (e) {
+            return e != null;
+        });
         let updatedTable = JSON.stringify(this.table);
         fs.writeFileSync(this.filename, updatedTable, (err) => {
             if (err) console.log(err);
