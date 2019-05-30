@@ -1,3 +1,8 @@
+/*
+    Code below adds exrension functions for Object and Array
+    Object.equals(object) Object.toString() Array.equals(array) Array.isEmpty()
+ */
+
 // Code for comparing arrays
 if (Array.prototype.equals) {
     console.warn("Overriding existing Array.prototype.equals. Possible causes: New API defines the method, there's a framework conflict or you've got double inclusions in your code.");
@@ -27,7 +32,19 @@ Array.prototype.equals = function (array) {
 Object.defineProperty(Array.prototype, "equals", {
     enumerable: false
 });
+// Code for removing undefined items from array
+if (Array.prototype.clean) {
+    console.warn("Overriding existing Array.prototype.clean. Possible causes: New API defines the method, there's a framework conflict or you've got double inclusions in your code.");
+}
+Array.prototype.clean = function () {
+     return (this.filter(function (e) {
+        return e != null;
+    }));
 
+}
+Object.defineProperty(Array.prototype, "clean", {
+    enumerable: false
+});
 //Code for comparing objects
 if (Object.prototype.equals) {
     console.warn("Overriding existing Object.prototype.equals. Possible causes: New API defines the method, there's a framework conflict or you've got double inclusions in your code.");
@@ -49,7 +66,6 @@ Object.prototype.equals = function (object) {
 Object.defineProperty(Object.prototype, "equals", {
     enumerable: false
 });
-
 // Code for converting object to string
 if (Object.prototype.toString) {
     console.warn("Overriding existing Object.prototype.toString. Possible causes: New API defines the method, there's a framework conflict or you've got double inclusions in your code.");
@@ -68,7 +84,6 @@ Object.prototype.toString = function () {
 Object.defineProperty(Object.prototype, "toString", {
     enumerable: false
 });
-
 // Code for checking if array is empty
 if (Array.prototype.isEmpty) {
     console.warn("Overriding existing Array.prototype.isEmpty. Possible causes: New API defines the method, there's a framework conflict or you've got double inclusions in your code.");
@@ -80,9 +95,15 @@ Object.defineProperty(Array.prototype, "isEmpty", {
     enumerable: false
 });
 
-// Dependencies
-const jsonfile = require('jsonfile');
+/*
+    Dependencies needed to run JSQL
+    file2json - converts json file containing array of objects into a JavaScript array of objects
+    csv2json - converts csv file into a json file containing array of objects
+    fs - module needed to work with filesystem
+ */
+
 const fs = require('fs');
+const file2json = require('./file2json');
 const csv2json = require('./csv2json');
 
 module.exports = class Table {
@@ -104,7 +125,7 @@ module.exports = class Table {
             // Reads JSON file
             this.isCSV = false;
             try {
-                this.table = jsonfile.readFileSync(filename);
+                this.table = file2json(this.filename);
             } catch (e) {
                 throw new Error(`Error reading ${filename}`);
             }
@@ -131,7 +152,7 @@ module.exports = class Table {
     }
 
     rename(name) {
-        // renames 
+        // renames the table
         console.log(`Renaming ${this.name} to ${name}`);
         this.name = name;
     }
@@ -162,6 +183,7 @@ module.exports = class Table {
     }
 
     print() {
+        // Prints the table on console
         console.table(this.table);
     }
 
@@ -300,7 +322,7 @@ module.exports = class Table {
     }
 
     duplicateSearch() {
-        // Looks for duplicates in table and returns array of duplicate objcets with original index and duplicate index
+        // Looks for duplicates in table and returns array of duplicate objcets with original index and duplicate indeces
         var format = (duplicateArray) => {
             var i = 0;
             while (i < duplicateArray.length) {
@@ -350,7 +372,7 @@ module.exports = class Table {
     }
 
     removeDuplicates() {
-        // Removes duplicates from array
+        // Removes duplicates from table
         let duplicateArray = this.duplicateSearch();
         var duplicateIndeces = [];
         for (var i in duplicateArray) {
@@ -366,9 +388,7 @@ module.exports = class Table {
                 }
             }
         }
-        this.table = this.table.filter(function (e) {
-            return e != null;
-        });
+        this.table = this.table.clean();
         let updatedTable = JSON.stringify(this.table);
         fs.writeFileSync(this.filename, updatedTable, (err) => {
             if (err) console.log(err);
@@ -380,6 +400,7 @@ module.exports = class Table {
     }
 
     removeByIndex(index) {
+        // Removes item from table at give index
         if (index > this.table.length) {
             console.warn(`Index exceed ${this.name}'s size`);
         } else {
@@ -397,7 +418,7 @@ module.exports = class Table {
     }
 
     removeByAttribute(column, value) {
-        // Removes all the elements that match column = value
+        // Removes all the elements that match column = value from table
         let result = this.returnIndices(column, value);
         for (var i in result) {
             for (var j in this.table) {
@@ -407,9 +428,7 @@ module.exports = class Table {
                 }
             }
         }
-        this.table = this.table.filter(function (e) {
-            return e != null;
-        });
+        this.table = this.table.clean();
         let updatedTable = JSON.stringify(this.table);
         fs.writeFileSync(this.filename, updatedTable, (err) => {
             if (err) console.log(err);

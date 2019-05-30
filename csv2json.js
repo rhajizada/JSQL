@@ -1,4 +1,6 @@
-// This module takes csv file and generates an array of JS objects
+/*
+    This module takes csv file and generates an array of JS objects
+ */
 const fs = require('fs');
 module.exports = function  csv2json(filename){
     var array = csv2array(filename);

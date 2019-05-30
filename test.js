@@ -11,7 +11,7 @@ led_zep.toHTML(); // Creates html file called 'Led Zeppelin.html' from table for
 let price_index_string = price_index.toString(); // Returns price index table as a formatted string
 // Creating new object to insert into  led_zep table
 let initialSearchResult = led_zep.simpleSearch('Song', 'Dazed and Confused');
-if(initialSearchResult == undefined){
+if (initialSearchResult == undefined) {
     // Checking if search returns nothing
     console.log("Can't find Stairway to Heaven");
 }
@@ -25,10 +25,13 @@ console.log(led_zep.toString()); // One way to print the table
 let laterSearchResult = led_zep.simpleSearchWithAttribute('Song', 'Stairway to Heaven', 'Album'); // Example of search with attribute
 console.dir(laterSearchResult); // Printing result of search
 led_zep.insert(newSong); // generating duplicate
+led_zep.insert(newSong); // generating duplicate
 let duplicates = led_zep.duplicateSearch();
-console.dir(duplicates); // Shows duplicates
 led_zep.removeByIndex(10); // Removing first duplicate by index
 led_zep.insert(led_zep.table[0]); // Generating  another duplicate
+console.log("Showing duplicate array: ");
+console.dir(duplicates); // Shows duplicates
 led_zep.removeByAttribute('Song', 'Stairway to Heaven'); // removing item by attribute
+
 led_zep.removeDuplicates(); // removing duplicates from table
 led_zep.print(); // print table on the console using console.table()
