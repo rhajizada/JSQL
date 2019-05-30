@@ -10,7 +10,8 @@ console.log(`Led zeppelin schema: ${led_zep.schema}`); // Another way to print s
 led_zep.toHTML(); // Creates html file called 'Led Zeppelin.html' from table for easier data visualization
 let price_index_string = price_index.toString(); // Returns price index table as a formatted string
 // Creating new object to insert into  led_zep table
-let initialSearchResult = led_zep.simpleSearch('Song', 'Dazed and Confused');
+let initialSearchResult = led_zep.simpleSearch('Song', 'Dazed and Confused'); // Example of simple search
+led_zep.rename(`Led Zeppelin I`); // Renaming table
 if (initialSearchResult === undefined) {
     // Checking if search returns nothing
     console.log("Can't find Stairway to Heaven");
@@ -34,4 +35,4 @@ console.dir(duplicates); // Shows duplicates
 led_zep.removeByAttribute('Song', 'Stairway to Heaven'); // removing item by attribute
 led_zep.removeDuplicates(); // removing duplicates from table
 led_zep.print(); // print table on the console using console.table()
-led_zep.toCSV();
+led_zep.toCSV(); // Creates a csv file for led_zep table

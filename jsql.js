@@ -496,4 +496,12 @@ module.exports = class Table {
             }
         });
     }
+
+    swap(target, destination){
+        // Swaps rows
+        let temp = this.table[target];
+        this.table[target] = this.table[destination];
+        this.table[destination] = temp;
+        console.log(`Swapped row at index ${target} with row at index ${destination}`);
+    }
 };
