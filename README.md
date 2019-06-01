@@ -10,7 +10,7 @@ JSQL loads an array of JSON's from the file you want to use and then using the w
 JSON array is a table and array item is a tuple.
 
 # Methods supported
-* constructor(filename,name) - constructs a  table from given file
+* constructor(init) - constructs a  table from given file or a new empty table
 * rename(name) - renames  the table
 * checkSchema() - checks if the schema is consistent throughout the table
 * printSchema() - prints the schema of table on the console

@@ -13,7 +13,7 @@ Array.prototype.equals = function (array) {
         return false;
 
     // compare lengths - can save a lot of time 
-    if (this.length != array.length)
+    if (this.length !== array.length)
         return false;
 
     let i = 0;
@@ -24,7 +24,7 @@ Array.prototype.equals = function (array) {
             // recurse into the nested arrays
             if (!this[i].equals(array[i]))
                 return false;
-        } else if (this[i] != array[i]) {
+        } else if (this[i] !== array[i]) {
             // Warning - two different object instances will never be equal: {x:20} != {x:20}
             return false;
         }
@@ -55,11 +55,11 @@ Object.prototype.equals = function (object) {
     if (!object) {
         return false;
     }
-    if (Object.keys(this).length != Object.keys(object).length) {
+    if (Object.keys(this).length !== Object.keys(object).length) {
         return false;
     }
     for (let i in Object.keys(this)) {
-        if (this[Object.keys(this)[i]] != object[Object.keys(this)[i]]) {
+        if (this[Object.keys(this)[i]] !== object[Object.keys(this)[i]]) {
             return false;
         }
     }
@@ -75,7 +75,7 @@ if (Object.prototype.toString) {
 Object.prototype.toString = function () {
     let string = "";
     for (let i in Object.values(this)) {
-        if (i != this.length - 1) {
+        if (i !== this.length - 1) {
             string += `${Object.values(this)[i]} `;
         } else {
             string += `${Object.values(this)[i]}`;
@@ -91,7 +91,7 @@ if (Array.prototype.isEmpty) {
     console.warn("Overriding existing Array.prototype.isEmpty. Possible causes: New API defines the method, there's a framework conflict or you've got double inclusions in your code.");
 }
 Array.prototype.isEmpty = function () {
-    return this.length == 0;
+    return this.length === 0;
 };
 Object.defineProperty(Array.prototype, "isEmpty", {
     enumerable: false
@@ -111,7 +111,7 @@ const csv2json = require('./csv2json');
 module.exports = class Table {
     constructor(init) {
         if(init.isNew) {
-            if (!Array.isArray(init.schema) || !init.schema) {
+            if (!Array.isArray(init.schema)) {
                 console.warn("Wrong schema. Schema should be array.");
             }
             if (typeof (init.name) != "string" || !init.name) {
@@ -134,7 +134,7 @@ module.exports = class Table {
         }
         else{
             // Constructs a table object from JSON file given
-            if (typeof (init.name) != "string" || !init.name || !init.filename || typeof(init.filename) != "string") {
+            if (typeof (init.name) != "string" || typeof(init.filename) != "string") {
                 console.warn("Wrong table name. Make sure table name is string.")
             }
             else {
@@ -215,7 +215,7 @@ module.exports = class Table {
     print() {
         // Prints the table on console
         if(this.table.isEmpty()){
-            console.log(`This ${this.name} is empty`);
+            console.log(`Table ${this.name} is empty`);
         }
         else {
             console.table(this.table);
@@ -266,8 +266,8 @@ module.exports = class Table {
 // Writes table into a new html file for better visualization
         let html = `<!DOCTYPE html>
             <html lang="en">
-            <title>${this.name}</title>
             <head>
+            <title>${this.name}</title>
             <style>
                 table {
                     font-family: arial, sans-serif;
@@ -323,7 +323,7 @@ module.exports = class Table {
         let csv = '';
         // noinspection Annotator
         for(i  in this.schema){
-            if(i != this.schema.length - 1) {
+            if(i !== this.schema.length - 1) {
                 csv +=  `${this.schema[i]},`
             }
             else {
@@ -334,14 +334,14 @@ module.exports = class Table {
         // noinspection Annotator
         for(i in this.table){
             for(let j in Object.values(this.table[i])){
-                if(j != Object.values(this.table[i]).length - 1){
+                if(j !== Object.values(this.table[i]).length - 1){
                     csv += `${Object.values(this.table[i])[j]},`
                 }
                 else{
                     csv += `${Object.values(this.table[i])[j]}`;
                 }
             }
-            if(i != this.table.length - 1) {
+            if(i !== this.table.length - 1) {
                 csv += '\n';
             }
         }
@@ -369,7 +369,7 @@ module.exports = class Table {
             // Looks for rows that match and adds them to return array of objects
             const result = [];
             for (let i = 0; i < this.table.length; i++) {
-                if (this.table[i][column] == value) {
+                if (this.table[i][column] === value) {
                     result.push(this.table[i]);
                 }
             }
@@ -382,14 +382,14 @@ module.exports = class Table {
     }
 
     returnIndices(column, value) {
-        if(typeof(column) != "string" || typeof(value) != "string" || !column || !value){
+        if(typeof(column) != "string" || typeof(value) != "string"){
             console.warn("Failed  searching table. Make sure column and value are both of type string");
         }
         // Looks for rows that match and adds them to return array of indices
         else {
             const result = [];
             for (let i = 0; i < this.table.length; i++) {
-                if (this.table[i][column] == value) {
+                if (this.table[i][column] === value) {
                     result.push(i);
                 }
             }
@@ -402,14 +402,14 @@ module.exports = class Table {
     }
 
     simpleSearchWithAttribute(column, value, attribute) {
-        if(typeof(column) != "string" || typeof(value) != "string" || typeof(attribute) != "string" || !column || !value || !attribute){
+        if(typeof(column) != "string" || typeof(value) != "string" || typeof(attribute) != "string"){
             console.warn("Failed searching table. Make sure column, value and attribute are both of type string")
         }
         // Looks for rows that match and adds value of the attribute to return array
         else {
             const result = [];
             for (let i = 0; i < this.table.length; i++) {
-                if (this.table[i][column] == value) {
+                if (this.table[i][column] === value) {
                     result.push(this.table[i][attribute]);
                 }
             }
@@ -424,11 +424,12 @@ module.exports = class Table {
     duplicateSearch() {
         // Looks for duplicates in table and returns array of duplicate objects with original index and duplicate indices
         const format = (duplicateArray) => {
+            let j;
             let i = 0;
             while (i < duplicateArray.length) {
-                var j = i + 1;
+                j = i + 1;
                 while (j < duplicateArray.length) {
-                    if (duplicateArray[i].duplicateIndex[0] == duplicateArray[j].originalIndex) {
+                    if (duplicateArray[i].duplicateIndex[0] === duplicateArray[j].originalIndex) {
                         duplicateArray[i].duplicateIndex.push(duplicateArray[j].duplicateIndex[0]);
                     }
                     j++;
@@ -439,7 +440,7 @@ module.exports = class Table {
             while (i < duplicateArray.length) {
                 j = i + 1;
                 while (j < duplicateArray.length) {
-                    if (duplicateArray[i] != undefined && duplicateArray[j] != undefined && duplicateArray[i].item.equals(duplicateArray[j].item)) {
+                    if (duplicateArray[i] !== undefined && duplicateArray[j] !== undefined && duplicateArray[i].item.equals(duplicateArray[j].item)) {
                         duplicateArray[j] = undefined;
                     }
                     j++;
@@ -447,7 +448,7 @@ module.exports = class Table {
                 i++;
             }
             duplicateArray = duplicateArray.filter(function (value, index, arr) {
-                return value != undefined;
+                return value !== undefined;
             });
             return duplicateArray;
         };
@@ -456,7 +457,7 @@ module.exports = class Table {
         while (x < this.table.length) {
             let z = x + 1;
             while (z < this.table.length) {
-                if (this.table[x] != undefined && this.table[x] != undefined && this.table[x].equals(this.table[z])) {
+                if (this.table[x] !== undefined && this.table[x] !== undefined && this.table[x].equals(this.table[z])) {
                     const y = {};
                     y.item = this.table[x];
                     y.originalIndex = x;
@@ -468,7 +469,13 @@ module.exports = class Table {
             x++;
         }
         duplicates = format(duplicates);
-        return duplicates;
+        if(duplicates.isEmpty()){
+            console.log(`No duplicates found in ${this.name}`);
+        }
+        else{
+            return duplicates;
+        }
+
     }
 
     removeDuplicates() {
@@ -506,44 +513,12 @@ module.exports = class Table {
     }
 
     removeByIndex(index) {
-        if(!index || typeof(index) != "number"){
-            console.warn("Failed removing item. Make sure index  is not empty and is of type number");
-        }
         // Removes item from table at give index
-        else {
-            if (index > this.table.length) {
-                console.warn(`Index exceed ${this.name}'s size`);
-            } else {
-                // Removes element from array by index
-                let removed = this.table.splice(index, 1);
-                let updatedTable = JSON.stringify(this.table);
-                fs.writeFileSync(this.filename, updatedTable, (err) => {
-                    if (err) console.log(err);
-                    else {
-                        console.log(`${this.filename} updated`);
-                    }
-                });
-                console.log(`Successfully removed item ${removed.toString()} from ${this.name}`);
-            }
-        }
-    }
-
-    removeByAttribute(column, value) {
-        if(typeof(column) != "string" || typeof(value) != "string" || !column || !value){
-            console.warn("Failed  removing item. Make sure  column and  value are both of type string")
-        }
-        // Removes all the elements that match column = value from table
-        else {
-            let result = this.returnIndices(column, value);
-            for (let i in result) {
-                for (let j in this.table) {
-                    if (result[i] == j) {
-                        console.log(`Successfully removed ${this.table[j].toString()}`);
-                        this.table[j] = undefined
-                    }
-                }
-            }
-            this.table = this.table.clean();
+        if (index > this.table.length) {
+            console.warn(`Index exceed ${this.name}'s size`);
+        } else {
+            // Removes element from array by index
+            let removed = this.table.splice(index, 1);
             let updatedTable = JSON.stringify(this.table);
             fs.writeFileSync(this.filename, updatedTable, (err) => {
                 if (err) console.log(err);
@@ -551,17 +526,41 @@ module.exports = class Table {
                     console.log(`${this.filename} updated`);
                 }
             });
+            console.log(`Successfully removed item ${removed.toString()} from ${this.name}`);
         }
     }
 
+    removeByAttribute(column, value) {
+        // Removes all the elements that match column = value from table
+        let result = this.returnIndices(column, value);
+        for (let i in result) {
+            for (let j in this.table) {
+                if (result[i] == j) {
+                    console.log(`Successfully removed ${this.table[j].toString()}`);
+                    this.table[j] = undefined
+                }
+            }
+        }
+        this.table = this.table.clean();
+        let updatedTable = JSON.stringify(this.table);
+        fs.writeFileSync(this.filename, updatedTable, (err) => {
+            if (err) console.log(err);
+            else {
+                console.log(`${this.filename} updated`);
+            }
+        });
+    }
+
     swap(target, destination){
-        if(!target || !destination || typeof(target) != "number" || typeof(destination) != "number"){
+        if(typeof(target) != "number" || typeof(destination) != "number"){
             console.warn("Failed swapping items. Make sure target and destination are both not  empty and of type number");
         }
-        // Swaps rows
-        let temp = this.table[target];
-        this.table[target] = this.table[destination];
-        this.table[destination] = temp;
-        console.log(`Swapped row at index ${target} with row at index ${destination}`);
+        else {
+            // Swaps rows
+            let temp = this.table[target];
+            this.table[target] = this.table[destination];
+            this.table[destination] = temp;
+            console.log(`Swapped row at index ${target} with row at index ${destination}`);
+        }
     }
 };
