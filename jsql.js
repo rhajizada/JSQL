@@ -109,55 +109,78 @@ const file2json = require('./file2json');
 const csv2json = require('./csv2json');
 
 module.exports = class Table {
-    constructor(filename, name) {
-        // Constructs a table object from JSON file given
-        this.name = name;
-        this.filename = filename;
-        this.isCSV;
-        if (filename.includes('.csv')) {
-            // Converts CSV to JSON file and stores it
-            this.table = csv2json(filename);
-            this.isCSV = true;
-            this.csvName = this.filename;
-            this.filename = filename.split('.csv')[0] + '.json';
-            fs.writeFileSync(this.filename, JSON.stringify(this.table), (err) => {
-                if (err) console.log(err);
-            });
-            console.log(`Converted ${filename} to  JSON format and stored it as ${this.filename}`);
-        } else if (filename.includes('.json')) {
-            // Reads JSON file
-            this.isCSV = false;
-            try {
-                this.table = file2json(this.filename);
-            } catch (e) {
-                throw new Error(`Error reading ${filename}`);
+    constructor(init) {
+        if(init.isNew) {
+            if (!Array.isArray(init.schema) || !init.schema) {
+                console.warn("Wrong schema. Schema should be array.");
             }
-        } else {
-            this.isCSV = false;
-            throw new Error(`${filename} is not supported format`);
+            if (typeof (init.name) != "string" || !init.name) {
+                console.warn("Wrong table name. Make sure table name is string.")
+            } else {
+                    this.table = [];
+                this.schema = init.schema;
+                this.name = init.name;
+                if (!init.filename) {
+                    this.filename = init.name.replace(' ', '-') + '.json';
+                } else {
+                    if (init.filename.includes('.json')) {
+                        this.filename = init.filename + '.json'
+                    } else {
+                        this.filename = init.filename;
+                    }
+                }
+                console.log(`Successfully created new table ${this.name}`);
+            }
         }
-        // Prints that table is initialized success
-        if (!this.table.isEmpty()) {
-            console.log(`Table ${this.name} successfully initialized from file ${this.filename}`);
+        else{
+            // Constructs a table object from JSON file given
+            if (typeof (init.name) != "string" || !init.name || !init.filename || typeof(init.filename) != "string") {
+                console.warn("Wrong table name. Make sure table name is string.")
+            }
+            else {
+                this.name = init.name;
+                this.filename = init.filename;
+                this.isCSV;
+                if (init.filename.includes('.csv')) {
+                    // Converts CSV to JSON file and stores it
+                    this.table = csv2json(init.filename);
+                    this.isCSV = true;
+                    this.csvName = this.filename;
+                    this.filename = init.filename.split('.csv')[0] + '.json';
+                    fs.writeFileSync(this.filename, JSON.stringify(this.table), (err) => {
+                        if (err) console.log(err);
+                    });
+                    console.log(`Converted ${init.filename} to  JSON format and stored it as ${this.filename}`);
+                } else if (init.filename.includes('.json')) {
+                    // Reads JSON file
+                    this.isCSV = false;
+                    try {
+                        this.table = file2json(this.filename);
+                    } catch (e) {
+                        throw new Error(`Error reading ${init.filename}`);
+                    }
+                } else {
+                    this.isCSV = false;
+                    throw new Error(`${init.filename} is not supported format`);
+                }
+                // Prints that table is initialized success
+                if (!this.table.isEmpty()) {
+                    console.log(`Table ${this.name} successfully initialized from file ${this.filename}`);
+                }
+                // Creates table from first object in array
+                this.schema = [];
+                for (let i = 0; i < Object.keys(this.table[0]).length; i++) {
+                    this.schema.push(Object.keys(this.table[0])[i]);
+                }
+                // Checks correctness of schema
+                this.schemaIsCorrect = this.checkSchema();
+                if (this.schemaIsCorrect) {
+                    console.log("Schema is consistent throughout the file");
+                } else {
+                    throw new Error("Schema is not consistent throughout the file");
+                }
+            }
         }
-        // Creates table from first object in array
-        this.schema = [];
-        for (let i = 0; i < Object.keys(this.table[0]).length; i++) {
-            this.schema.push(Object.keys(this.table[0])[i]);
-        }
-        // Checks correctness of schema
-        this.schemaIsCorrect = this.checkSchema();
-        if (this.schemaIsCorrect) {
-            console.log("Schema is consistent throughout the file");
-        } else {
-            throw new Error("Schema is not consistent throughout the file");
-        }
-    }
-
-    rename(name) {
-        // renames the table
-        console.log(`Renaming ${this.name} to ${name}`);
-        this.name = name;
     }
 
     checkSchema() {
@@ -175,6 +198,10 @@ module.exports = class Table {
         return correct;
     }
 
+    rename(name){
+        this.name = name;
+    }
+
     printSchema() {
         // Prints the table schema 
         console.log(this.name + " schema is:");
@@ -187,7 +214,12 @@ module.exports = class Table {
 
     print() {
         // Prints the table on console
-        console.table(this.table);
+        if(this.table.isEmpty()){
+            console.log(`This ${this.name} is empty`);
+        }
+        else {
+            console.table(this.table);
+        }
     }
 
     toString() {
@@ -220,7 +252,7 @@ module.exports = class Table {
                     console.log(`${this.filename} updated`);
                 }
             });
-            console.log(`Successfully inserted ${JSON.stringify(row)}`);
+            console.log(`Successfully inserted ${row.toString()} to ${this.name}`);
         } else {
             console.warn("Input object is using wrong schema.\nFailed inserting into table.\nTable schema is: ");
             console.log(this.schema);
@@ -330,47 +362,62 @@ module.exports = class Table {
     }
 
     simpleSearch(column, value) {
-        // Looks for rows that match and adds them to return array of objects
-        const result = [];
-        for (let i = 0; i < this.table.length; i++) {
-            if (this.table[i][column] == value) {
-                result.push(this.table[i]);
-            }
+        if(typeof(column) != "string" || typeof(value) != "string" || !column || !value){
+            console.warn("Failed  searching table. Make sure column and value are both of type string");
         }
-        if (!result.isEmpty()) {
-            return result;
-        } else {
-            console.warn("Value not found!");
+        else {
+            // Looks for rows that match and adds them to return array of objects
+            const result = [];
+            for (let i = 0; i < this.table.length; i++) {
+                if (this.table[i][column] == value) {
+                    result.push(this.table[i]);
+                }
+            }
+            if (!result.isEmpty()) {
+                return result;
+            } else {
+                console.warn("Value not found!");
+            }
         }
     }
 
     returnIndices(column, value) {
-        // Looks for rows that match and adds them to return array of indices 
-        const result = [];
-        for (let i = 0; i < this.table.length; i++) {
-            if (this.table[i][column] == value) {
-                result.push(i);
-            }
+        if(typeof(column) != "string" || typeof(value) != "string" || !column || !value){
+            console.warn("Failed  searching table. Make sure column and value are both of type string");
         }
-        if (!result.isEmpty()) {
-            return result;
-        } else {
-            console.warn("Value not found!");
+        // Looks for rows that match and adds them to return array of indices
+        else {
+            const result = [];
+            for (let i = 0; i < this.table.length; i++) {
+                if (this.table[i][column] == value) {
+                    result.push(i);
+                }
+            }
+            if (!result.isEmpty()) {
+                return result;
+            } else {
+                console.warn("Value not found!");
+            }
         }
     }
 
     simpleSearchWithAttribute(column, value, attribute) {
-        // Looks for rows that match and adds value of the attribute to return array
-        const result = [];
-        for (let i = 0; i < this.table.length; i++) {
-            if (this.table[i][column] == value) {
-                result.push(this.table[i][attribute]);
-            }
+        if(typeof(column) != "string" || typeof(value) != "string" || typeof(attribute) != "string" || !column || !value || !attribute){
+            console.warn("Failed searching table. Make sure column, value and attribute are both of type string")
         }
-        if (!result.isEmpty()) {
-            return result;
-        } else {
-            console.log("Value not found!");
+        // Looks for rows that match and adds value of the attribute to return array
+        else {
+            const result = [];
+            for (let i = 0; i < this.table.length; i++) {
+                if (this.table[i][column] == value) {
+                    result.push(this.table[i][attribute]);
+                }
+            }
+            if (!result.isEmpty()) {
+                return result;
+            } else {
+                console.log("Value not found!");
+            }
         }
     }
 
@@ -459,12 +506,44 @@ module.exports = class Table {
     }
 
     removeByIndex(index) {
+        if(!index || typeof(index) != "number"){
+            console.warn("Failed removing item. Make sure index  is not empty and is of type number");
+        }
         // Removes item from table at give index
-        if (index > this.table.length) {
-            console.warn(`Index exceed ${this.name}'s size`);
-        } else {
-            // Removes element from array by index
-            let removed = this.table.splice(index, 1);
+        else {
+            if (index > this.table.length) {
+                console.warn(`Index exceed ${this.name}'s size`);
+            } else {
+                // Removes element from array by index
+                let removed = this.table.splice(index, 1);
+                let updatedTable = JSON.stringify(this.table);
+                fs.writeFileSync(this.filename, updatedTable, (err) => {
+                    if (err) console.log(err);
+                    else {
+                        console.log(`${this.filename} updated`);
+                    }
+                });
+                console.log(`Successfully removed item ${removed.toString()} from ${this.name}`);
+            }
+        }
+    }
+
+    removeByAttribute(column, value) {
+        if(typeof(column) != "string" || typeof(value) != "string" || !column || !value){
+            console.warn("Failed  removing item. Make sure  column and  value are both of type string")
+        }
+        // Removes all the elements that match column = value from table
+        else {
+            let result = this.returnIndices(column, value);
+            for (let i in result) {
+                for (let j in this.table) {
+                    if (result[i] == j) {
+                        console.log(`Successfully removed ${this.table[j].toString()}`);
+                        this.table[j] = undefined
+                    }
+                }
+            }
+            this.table = this.table.clean();
             let updatedTable = JSON.stringify(this.table);
             fs.writeFileSync(this.filename, updatedTable, (err) => {
                 if (err) console.log(err);
@@ -472,32 +551,13 @@ module.exports = class Table {
                     console.log(`${this.filename} updated`);
                 }
             });
-            console.log(`Successfully removed item ${removed.toString()} from ${this.name}`);
         }
-    }
-
-    removeByAttribute(column, value) {
-        // Removes all the elements that match column = value from table
-        let result = this.returnIndices(column, value);
-        for (let i in result) {
-            for (let j in this.table) {
-                if (result[i] == j) {
-                    console.log(`Successfully removed ${this.table[j].toString()}`);
-                    this.table[j] = undefined
-                }
-            }
-        }
-        this.table = this.table.clean();
-        let updatedTable = JSON.stringify(this.table);
-        fs.writeFileSync(this.filename, updatedTable, (err) => {
-            if (err) console.log(err);
-            else {
-                console.log(`${this.filename} updated`);
-            }
-        });
     }
 
     swap(target, destination){
+        if(!target || !destination || typeof(target) != "number" || typeof(destination) != "number"){
+            console.warn("Failed swapping items. Make sure target and destination are both not  empty and of type number");
+        }
         // Swaps rows
         let temp = this.table[target];
         this.table[target] = this.table[destination];

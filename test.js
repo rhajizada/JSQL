@@ -3,8 +3,22 @@
     You  can use data in 'Sample Data'  folder to test the library
 */
 let Table = require('./jsql'); // Imports library from jsql.js as Table
-let led_zep = new Table('./Sample Data/songs.json', 'Led Zeppelin'); // creates a new table from songs.json file
-let price_index = new Table('./Sample Data/price-index.csv', 'Price Indexes'); // creates  a new table and converts to json from price-index.csv
+let led_zep_iv = new Table({name: 'Led Zeppelin IV', schema: ['Song', 'Artist', 'Album'], isNew: true}); // creates new empty table Led Zeppelin Iv
+led_zep_iv.print(); // will print that table is empty since its just created
+/*
+    Inserting items to new table
+ */
+led_zep_iv.insert({Song: 'Black Dog', Artist: 'Led Zeppelin', Album: 'Led Zeppelin IV' });
+led_zep_iv.insert({Song: 'Rock and Roll', Artist: 'Led Zeppelin', Album: 'Led Zeppelin IV' });
+led_zep_iv.insert({Song: 'The Battle of Evermore', Artist: 'Led Zeppelin', Album: 'Led Zeppelin IV' });
+led_zep_iv.insert({Song: 'Stairway to Heaven', Artist: 'Led Zeppelin', Album: 'Led Zeppelin IV' });
+led_zep_iv.insert({Song: 'Misty Mountain Hop', Artist: 'Led Zeppelin', Album: 'Led Zeppelin IV' });
+led_zep_iv.insert({Song: 'Four Sticks', Artist: 'Led Zeppelin', Album: 'Led Zeppelin IV'});
+led_zep_iv.insert({Song: 'Going to California', Artist: 'Led Zeppelin', Album: 'Led Zeppelin IV'});
+led_zep_iv.insert({Song: 'When the Levee Breaks', Artist: 'Led Zeppelin', Album: 'Led Zeppelin IV'});
+led_zep_iv.print();  // Printing table with all  items inserted above
+let led_zep = new Table({filename: 'Sample Data/songs.json', name: 'Led Zeppelin'}); // creates a new table from songs.json file
+let price_index = new Table({filename: 'Sample Data/price-index.csv', name: 'Price Indexes'}); // creates  a new table and converts to json from price-index.csv
 price_index.printSchema(); // Prints schema of price_index on console
 console.log(`Led zeppelin schema: ${led_zep.schema}`); // Another way to print schema
 led_zep.toHTML(); // Creates html file called 'Led Zeppelin.html' from table for easier data visualization
