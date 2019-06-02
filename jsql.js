@@ -121,7 +121,7 @@ module.exports = class Table {
                 this.schema = init.schema;
                 this.name = init.name;
                 if (!init.filename) {
-                    this.filename = init.name.replace(' ', '-') + '.json';
+                    this.filename = init.name.replace(/ /g, '-') + '.json';
                 } else {
                     if (init.filename.includes('.json')) {
                         this.filename = init.filename + '.json'
@@ -447,9 +447,7 @@ module.exports = class Table {
                 }
                 i++;
             }
-            duplicateArray = duplicateArray.filter(function (value, index, arr) {
-                return value !== undefined;
-            });
+            duplicateArray = duplicateArray.clean();
             return duplicateArray;
         };
         let x = 0;
@@ -561,6 +559,47 @@ module.exports = class Table {
             this.table[target] = this.table[destination];
             this.table[destination] = temp;
             console.log(`Swapped row at index ${target} with row at index ${destination}`);
+        }
+    }
+
+    static join(table1, table2, attribute1, attribute2) {
+        // Performs simple inner join on table1 and table2
+        if (table1 instanceof Table && table2 instanceof Table) {
+            console.log("Both of them instance of table");
+            let newSchema = table1.schema;
+            let i;
+            let j;
+            let k;
+            for (i in table2.schema) {
+                if (!(newSchema.includes(table2.schema[i]))) {
+                    newSchema.push((table2.schema[i]));
+                }
+            }
+            let join = new Table({name: `${table1.name}_${table2.name}_join`, schema:  newSchema, isNew: true});
+            for(i in table1.table){
+                let val1 = table1.table[i][attribute1];
+                for(j in table2.table){
+                    let val2 = table2.table[j][attribute2];
+                    let obj = {};
+                    if(val1 == val2){
+                        for(k in newSchema){
+                            if (table2.schema.includes(newSchema[k])){
+                                obj[newSchema[k]] = table2.table[j][newSchema[k]];
+                            }
+                            else{
+                                obj[newSchema[k]] = table1.table[i][newSchema[k]];
+                            }
+                        }
+                    }
+                    if(Object.values(obj) != 0) {
+                        join.insert(obj);
+                    }
+                }
+            }
+            return join;
+        }
+        else{
+            console.warn("Failed performing join. Make sure  table1 and table2 are both instance  of Table");
         }
     }
 };

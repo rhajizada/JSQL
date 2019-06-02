@@ -4,7 +4,7 @@
   "description": "Library that allows user querying array of JSONs as if it was a SQL database",
   "main": "jsql.js",
   "scripts": {
-    "test": "node test.js"
+    "test": "node test_join.js"
   },
   "repository": {
     "type": "git",
