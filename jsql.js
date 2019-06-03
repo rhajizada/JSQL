@@ -39,7 +39,7 @@ if (Array.prototype.clean) {
     console.warn("Overriding existing Array.prototype.clean. Possible causes: New API defines the method, there's a framework conflict or you've got double inclusions in your code.");
 }
 Array.prototype.clean = function () {
-     return (this.filter(function (e) {
+    return (this.filter(function (e) {
         return e != null;
     }));
 
@@ -110,14 +110,14 @@ const csv2json = require('./csv2json');
 
 module.exports = class Table {
     constructor(init) {
-        if(init.isNew) {
+        if (init.isNew) {
             if (!Array.isArray(init.schema)) {
                 console.warn("Wrong schema. Schema should be array.");
             }
             if (typeof (init.name) != "string" || !init.name) {
                 console.warn("Wrong table name. Make sure table name is string.")
             } else {
-                    this.table = [];
+                this.table = [];
                 this.schema = init.schema;
                 this.name = init.name;
                 if (!init.filename) {
@@ -131,13 +131,11 @@ module.exports = class Table {
                 }
                 console.log(`Successfully created new table ${this.name}`);
             }
-        }
-        else{
+        } else {
             // Constructs a table object from JSON file given
-            if (typeof (init.name) != "string" || typeof(init.filename) != "string") {
+            if (typeof (init.name) != "string" || typeof (init.filename) != "string") {
                 console.warn("Wrong table name. Make sure table name is string.")
-            }
-            else {
+            } else {
                 this.name = init.name;
                 this.filename = init.filename;
                 this.isCSV;
@@ -177,11 +175,41 @@ module.exports = class Table {
                 if (this.schemaIsCorrect) {
                     console.log("Schema is consistent throughout the file");
                 } else {
-                    throw new Error("Schema is not consistent throughout the file");
+                    this.fixSchema();
+                    console.log("Schema was wrong. Fixing table");
+                    fs.writeFileSync(this.filename, JSON.stringify(this.table), (err) => {
+                        if (err) console.log(err);
+                    });
                 }
             }
         }
     }
+
+    static fromComplexJSON(filename) {
+        let file = JSON.parse(fs.readFileSync(filename, 'utf-8'));
+        let tableNames = Object.keys(file);
+        console.dir(tableNames);
+        let i;
+        let j;
+        let k;
+        let newFiles = [];
+        let newSchema = [];
+        for (i in tableNames) {
+            fs.writeFileSync(`${filename.split('.json')[0]}_${tableNames[i]}.json`, JSON.stringify(file[tableNames[i]]), (err) => {
+                if (err) console.log(err);
+            });
+            newFiles.push(`${filename.split('.json')[0]}_${tableNames[i]}.json`);
+        }
+        let tables = []
+        for (i in newFiles) {
+            tables.push(new Table({
+                filename: newFiles[i],
+                name: tableNames[i]
+            }))
+        }
+        return tables;
+    }
+
 
     checkSchema() {
         // Checks if schema is consistent through all file
@@ -198,7 +226,28 @@ module.exports = class Table {
         return correct;
     }
 
-    rename(name){
+    fixSchema() {
+        let newSchema = [];
+        let i;
+        let j;
+        for (i in this.table) {
+            for (j in Object.keys(this.table[i])) {
+                if (!(newSchema.includes(Object.keys(this.table[i])[j]))) {
+                    newSchema.push(Object.keys(this.table[i])[j]);
+                }
+            }
+        }
+        for (i in this.table) {
+            for (j in newSchema) {
+                if (this.table[i][newSchema[j]] == undefined) {
+                    this.table[i][newSchema[j]] = null;
+                }
+            }
+        }
+        this.schema = newSchema;
+    }
+
+    rename(name) {
         this.name = name;
     }
 
@@ -214,10 +263,9 @@ module.exports = class Table {
 
     print() {
         // Prints the table on console
-        if(this.table.isEmpty()){
+        if (this.table.isEmpty()) {
             console.log(`Table ${this.name} is empty`);
-        }
-        else {
+        } else {
             console.table(this.table);
         }
     }
@@ -263,7 +311,7 @@ module.exports = class Table {
 
     toHTML() {
         let i;
-// Writes table into a new html file for better visualization
+        // Writes table into a new html file for better visualization
         let html = `<!DOCTYPE html>
             <html lang="en">
             <head>
@@ -311,37 +359,34 @@ module.exports = class Table {
         });
     }
 
-    toCSV(){
+    toCSV() {
         let i;
         let newFileName = '';
-        if(this.isCSV){
+        if (this.isCSV) {
             newFileName = this.csvName;
-        }
-        else{
+        } else {
             newFileName = this.filename.split('.json')[0] + '.csv';
         }
         let csv = '';
         // noinspection Annotator
-        for(i  in this.schema){
-            if(i !== this.schema.length - 1) {
-                csv +=  `${this.schema[i]},`
-            }
-            else {
+        for (i in this.schema) {
+            if (i !== this.schema.length - 1) {
+                csv += `${this.schema[i]},`
+            } else {
                 csv += `${this.schema[i]}`
             }
         }
         csv += '\n';
         // noinspection Annotator
-        for(i in this.table){
-            for(let j in Object.values(this.table[i])){
-                if(j !== Object.values(this.table[i]).length - 1){
+        for (i in this.table) {
+            for (let j in Object.values(this.table[i])) {
+                if (j !== Object.values(this.table[i]).length - 1) {
                     csv += `${Object.values(this.table[i])[j]},`
-                }
-                else{
+                } else {
                     csv += `${Object.values(this.table[i])[j]}`;
                 }
             }
-            if(i !== this.table.length - 1) {
+            if (i !== this.table.length - 1) {
                 csv += '\n';
             }
         }
@@ -352,20 +397,18 @@ module.exports = class Table {
             }
         });
         let consoleMessage = "";
-        if(this.isCSV){
+        if (this.isCSV) {
             consoleMessage = `Updated ${this.csvName}`;
-        }
-        else{
+        } else {
             consoleMessage = `Converted ${this.filename} to CSV and created ${newFileName}`;
         }
         console.log(consoleMessage);
     }
 
     simpleSearch(column, value) {
-        if(typeof(column) != "string" || typeof(value) != "string" || !column || !value){
+        if (typeof (column) != "string" || typeof (value) != "string" || !column || !value) {
             console.warn("Failed  searching table. Make sure column and value are both of type string");
-        }
-        else {
+        } else {
             // Looks for rows that match and adds them to return array of objects
             const result = [];
             for (let i = 0; i < this.table.length; i++) {
@@ -382,7 +425,7 @@ module.exports = class Table {
     }
 
     returnIndices(column, value) {
-        if(typeof(column) != "string" || typeof(value) != "string"){
+        if (typeof (column) != "string" || typeof (value) != "string") {
             console.warn("Failed  searching table. Make sure column and value are both of type string");
         }
         // Looks for rows that match and adds them to return array of indices
@@ -402,7 +445,7 @@ module.exports = class Table {
     }
 
     simpleSearchWithAttribute(column, value, attribute) {
-        if(typeof(column) != "string" || typeof(value) != "string" || typeof(attribute) != "string"){
+        if (typeof (column) != "string" || typeof (value) != "string" || typeof (attribute) != "string") {
             console.warn("Failed searching table. Make sure column, value and attribute are both of type string")
         }
         // Looks for rows that match and adds value of the attribute to return array
@@ -467,10 +510,9 @@ module.exports = class Table {
             x++;
         }
         duplicates = format(duplicates);
-        if(duplicates.isEmpty()){
+        if (duplicates.isEmpty()) {
             console.log(`No duplicates found in ${this.name}`);
-        }
-        else{
+        } else {
             return duplicates;
         }
 
@@ -479,7 +521,7 @@ module.exports = class Table {
     removeDuplicates() {
         let j;
         let i;
-// Removes duplicates from table
+        // Removes duplicates from table
         let duplicateArray = this.duplicateSearch();
         const duplicateIndices = [];
         // noinspection Annotator
@@ -549,11 +591,10 @@ module.exports = class Table {
         });
     }
 
-    swap(target, destination){
-        if(typeof(target) != "number" || typeof(destination) != "number"){
+    swap(target, destination) {
+        if (typeof (target) != "number" || typeof (destination) != "number") {
             console.warn("Failed swapping items. Make sure target and destination are both not  empty and of type number");
-        }
-        else {
+        } else {
             // Swaps rows
             let temp = this.table[target];
             this.table[target] = this.table[destination];
@@ -575,30 +616,32 @@ module.exports = class Table {
                     newSchema.push((table2.schema[i]));
                 }
             }
-            let join = new Table({name: `${table1.name}_${table2.name}_join`, schema:  newSchema, isNew: true});
-            for(i in table1.table){
+            let join = new Table({
+                name: `${table1.name}_${table2.name}_join`,
+                schema: newSchema,
+                isNew: true
+            });
+            for (i in table1.table) {
                 let val1 = table1.table[i][attribute1];
-                for(j in table2.table){
+                for (j in table2.table) {
                     let val2 = table2.table[j][attribute2];
                     let obj = {};
-                    if(val1 == val2){
-                        for(k in newSchema){
-                            if (table2.schema.includes(newSchema[k])){
+                    if (val1 == val2) {
+                        for (k in newSchema) {
+                            if (table2.schema.includes(newSchema[k])) {
                                 obj[newSchema[k]] = table2.table[j][newSchema[k]];
-                            }
-                            else{
+                            } else {
                                 obj[newSchema[k]] = table1.table[i][newSchema[k]];
                             }
                         }
                     }
-                    if(Object.values(obj) != 0) {
+                    if (Object.values(obj) != 0) {
                         join.insert(obj);
                     }
                 }
             }
             return join;
-        }
-        else{
+        } else {
             console.warn("Failed performing join. Make sure  table1 and table2 are both instance  of Table");
         }
     }
