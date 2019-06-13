@@ -162,7 +162,7 @@ module.exports = class Table {
                     throw new Error(`${init.filename} is not supported format`);
                 }
                 // Prints that table is initialized success
-                if (!this.table.isEmpty()) {
+                if (this.table.length != 0) {
                     console.log(`Table ${this.name} successfully initialized from file ${this.filename}`);
                 }
                 // Creates table from first object in array
@@ -183,6 +183,19 @@ module.exports = class Table {
                 }
             }
         }
+    }
+
+    epochToReadable(attribute){
+        let i;
+        for(i in this.table){
+            var d = new Date(0); // The 0 there is the key, which sets the date to the epoch
+            d.setUTCMilliseconds(this.table[i][attribute]);
+            this.table[i][attribute] = d.toDateString();
+        }
+        fs.writeFileSync(this.filename, JSON.stringify(this.table), (err) => {
+            if (err) console.log(err);
+        });
+        console.log("Succesfully converted epoch to readable date");
     }
 
     static fromComplexJSON(filename) {
@@ -309,7 +322,10 @@ module.exports = class Table {
         }
     }
 
-    toHTML() {
+    toHTML(path) {
+        if(path == undefined){
+            path = ''
+        }
         let i;
         // Writes table into a new html file for better visualization
         let html = `<!DOCTYPE html>
@@ -353,13 +369,16 @@ module.exports = class Table {
         html += `</table>
                  </body>
                  </html>`;
-        fs.writeFileSync(this.name + ".html", html, (err) => {
+        fs.writeFileSync(`${path}${this.name}.html`, html, (err) => {
             if (err) console.warn(err);
             else console.log("HTML file of table created");
         });
     }
 
-    toCSV() {
+    toCSV(path) {
+        if(path == undefined){
+            path = '';
+        }
         let i;
         let newFileName = '';
         if (this.isCSV) {
@@ -390,7 +409,7 @@ module.exports = class Table {
                 csv += '\n';
             }
         }
-        fs.writeFileSync(newFileName, csv, (err) => {
+        fs.writeFileSync(`${path}${newFileName}`, csv, (err) => {
             if (err) console.log(err);
             else {
                 console.log(`${this.filename} updated`);

@@ -42,7 +42,7 @@ function line2array( strData, strDelimiter ){
     );
     const arrData = [[]];
     let arrMatches = null;
-    while (arrMatches == objPattern.exec(strData)){
+    while (arrMatches = objPattern.exec(strData)){
         const strMatchedDelimiter = arrMatches[1];
         if (
             strMatchedDelimiter.length &&
