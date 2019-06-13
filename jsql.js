@@ -110,117 +110,154 @@ const csv2json = require('./csv2json');
 
 module.exports = class Table {
     constructor(init) {
-        if (init.isNew) {
-            if (!Array.isArray(init.schema)) {
-                console.warn("Wrong schema. Schema should be array.");
-            }
-            if (typeof (init.name) != "string" || !init.name) {
-                console.warn("Wrong table name. Make sure table name is string.")
-            } else {
-                this.table = [];
-                this.schema = init.schema;
-                this.name = init.name;
-                if (!init.filename) {
-                    this.filename = init.name.replace(/ /g, '-') + '.json';
+        if(typeof(init) !== "object"){
+            console.warn("Failed constructing table. Make sure that init is of type object");
+        }
+        else {
+            if (init.isNew) {
+                if (!Array.isArray(init.schema)) {
+                    console.warn("Wrong schema. Schema should be array.");
+                }
+                if (typeof (init.name) != "string" || !init.name) {
+                    console.warn("Wrong table name. Make sure table name is string.")
                 } else {
-                    if (init.filename.includes('.json')) {
-                        this.filename = init.filename + '.json'
+                    this.table = [];
+                    this.schema = init.schema;
+                    this.name = init.name;
+                    if (!init.filename) {
+                        this.filename = init.name.replace(/ /g, '-') + '.json';
                     } else {
-                        this.filename = init.filename;
+                        if (init.filename.includes('.json')) {
+                            this.filename = init.filename + '.json'
+                        } else {
+                            this.filename = init.filename;
+                        }
                     }
+                    console.log(`Successfully created new table ${this.name}`);
                 }
-                console.log(`Successfully created new table ${this.name}`);
-            }
-        } else {
-            // Constructs a table object from JSON file given
-            if (typeof (init.name) != "string" || typeof (init.filename) != "string") {
-                console.warn("Wrong table name. Make sure table name is string.")
             } else {
-                this.name = init.name;
-                this.filename = init.filename;
-                this.isCSV;
-                if (init.filename.includes('.csv')) {
-                    // Converts CSV to JSON file and stores it
-                    this.table = csv2json(init.filename);
-                    this.isCSV = true;
-                    this.csvName = this.filename;
-                    this.filename = init.filename.split('.csv')[0] + '.json';
-                    fs.writeFileSync(this.filename, JSON.stringify(this.table), (err) => {
-                        if (err) console.log(err);
-                    });
-                    console.log(`Converted ${init.filename} to  JSON format and stored it as ${this.filename}`);
-                } else if (init.filename.includes('.json')) {
-                    // Reads JSON file
-                    this.isCSV = false;
-                    try {
-                        this.table = file2json(this.filename);
-                    } catch (e) {
-                        throw new Error(`Error reading ${init.filename}`);
+                // Constructs a table object from JSON file given
+                if (typeof (init.name) != "string" || typeof (init.filename) != "string") {
+                    console.warn("Wrong table name. Make sure table name is string.")
+                } else {
+                    this.name = init.name;
+                    this.filename = init.filename;
+                    this.isCSV;
+                    if (init.filename.includes('.csv')) {
+                        // Converts CSV to JSON file and stores it
+                        this.table = csv2json(init.filename);
+                        this.isCSV = true;
+                        this.csvName = this.filename;
+                        this.filename = init.filename.split('.csv')[0] + '.json';
+                        fs.writeFileSync(this.filename, JSON.stringify(this.table), (err) => {
+                            if (err) console.log(err);
+                        });
+                        console.log(`Converted ${init.filename} to  JSON format and stored it as ${this.filename}`);
+                    } else if (init.filename.includes('.json')) {
+                        // Reads JSON file
+                        this.isCSV = false;
+                        try {
+                            this.table = file2json(this.filename);
+                        } catch (e) {
+                            throw new Error(`Error reading ${init.filename}`);
+                        }
+                    } else {
+                        this.isCSV = false;
+                        throw new Error(`${init.filename} is not supported format`);
                     }
-                } else {
-                    this.isCSV = false;
-                    throw new Error(`${init.filename} is not supported format`);
-                }
-                // Prints that table is initialized success
-                if (this.table.length != 0) {
-                    console.log(`Table ${this.name} successfully initialized from file ${this.filename}`);
-                }
-                // Creates table from first object in array
-                this.schema = [];
-                for (let i = 0; i < Object.keys(this.table[0]).length; i++) {
-                    this.schema.push(Object.keys(this.table[0])[i]);
-                }
-                // Checks correctness of schema
-                this.schemaIsCorrect = this.checkSchema();
-                if (this.schemaIsCorrect) {
-                    console.log("Schema is consistent throughout the file");
-                } else {
-                    this.fixSchema();
-                    console.log("Schema was wrong. Fixing table");
-                    fs.writeFileSync(this.filename, JSON.stringify(this.table), (err) => {
-                        if (err) console.log(err);
-                    });
+                    // Prints that table is initialized success
+                    if (this.table.length != 0) {
+                        console.log(`Table ${this.name} successfully initialized from file ${this.filename}`);
+                    }
+                    // Creates table from first object in array
+                    this.schema = [];
+                    for (let i = 0; i < Object.keys(this.table[0]).length; i++) {
+                        this.schema.push(Object.keys(this.table[0])[i]);
+                    }
+                    // Checks correctness of schema
+                    this.schemaIsCorrect = this.checkSchema();
+                    if (this.schemaIsCorrect) {
+                        console.log("Schema is consistent throughout the file");
+                    } else {
+                        this.fixSchema();
+                        console.log("Schema was wrong. Fixing table");
+                        fs.writeFileSync(this.filename, JSON.stringify(this.table), (err) => {
+                            if (err) console.log(err);
+                        });
+                    }
                 }
             }
+        }
+    }
+
+    static fromFile(filename, name){
+        // Another way to create table from file
+        if(typeof(filename) !== "string" && typeof(name) !== "string"){
+            console.warn(`Error creating new table from ${filename}. Make sure filename and name are type of string type`);
+        }
+        else {
+            return new Table({name: name, filename: filename});
+        }
+    }
+
+    static newTable(name, schema){
+        // Another way to construct new table
+        if(typeof(name) != "string" && !Array.isArray(schema)){
+            console.warn("Error creating new table. Make sure that name is type of string and schema is type of array");
+        }
+        else{
+            return new Table({name: name, schema: schema, isNew: true});
         }
     }
 
     epochToReadable(attribute){
-        let i;
-        for(i in this.table){
-            var d = new Date(0); // The 0 there is the key, which sets the date to the epoch
-            d.setUTCMilliseconds(this.table[i][attribute]);
-            this.table[i][attribute] = d.toDateString();
+        // Given the attribute converts UNIX epoch into date and time string
+        if(typeof(attribute) != "string") {
+            console.warn("Error converting epoch into date string. Make sure attribute is of type string");
         }
-        fs.writeFileSync(this.filename, JSON.stringify(this.table), (err) => {
-            if (err) console.log(err);
-        });
-        console.log("Succesfully converted epoch to readable date");
+        else{
+            let i;
+            for (i in this.table) {
+                var d = new Date(0); // The 0 there is the key, which sets the date to the epoch
+                d.setUTCMilliseconds(this.table[i][attribute]);
+                this.table[i][attribute] = d.toDateString();
+            }
+            fs.writeFileSync(this.filename, JSON.stringify(this.table), (err) => {
+                if (err) console.log(err);
+            });
+            console.log("Succesfully converted epoch to readable date");
+        }
     }
 
     static fromComplexJSON(filename) {
-        let file = JSON.parse(fs.readFileSync(filename, 'utf-8'));
-        let tableNames = Object.keys(file);
-        console.dir(tableNames);
-        let i;
-        let j;
-        let k;
-        let newFiles = [];
-        let newSchema = [];
-        for (i in tableNames) {
-            fs.writeFileSync(`${filename.split('.json')[0]}_${tableNames[i]}.json`, JSON.stringify(file[tableNames[i]]), (err) => {
-                if (err) console.log(err);
-            });
-            newFiles.push(`${filename.split('.json')[0]}_${tableNames[i]}.json`);
+        // Creates an array of tables from complex JSON file
+        if(typeof(file) !== "string"){
+            console.warn(`Error creating array of tables from compplex json. Make sure filename is of type string`);
         }
-        let tables = []
-        for (i in newFiles) {
-            tables.push(new Table({
-                filename: newFiles[i],
-                name: tableNames[i]
-            }))
+        else{
+            let file = JSON.parse(fs.readFileSync(filename, 'utf-8'));
+            let tableNames = Object.keys(file);
+            console.dir(tableNames);
+            let i;
+            let j;
+            let k;
+            let newFiles = [];
+            let newSchema = [];
+            for (i in tableNames) {
+                fs.writeFileSync(`${filename.split('.json')[0]}_${tableNames[i]}.json`, JSON.stringify(file[tableNames[i]]), (err) => {
+                    if (err) console.log(err);
+                });
+                newFiles.push(`${filename.split('.json')[0]}_${tableNames[i]}.json`);
+            }
+            let tables = []
+            for (i in newFiles) {
+                tables.push(new Table({
+                    filename: newFiles[i],
+                    name: tableNames[i]
+                }))
+            }
+            return tables;
         }
-        return tables;
     }
 
 
@@ -261,7 +298,12 @@ module.exports = class Table {
     }
 
     rename(name) {
-        this.name = name;
+        if(typeof(name) !== "string"){
+            console.warn("Failed renaming table. Make sure name is of type string");
+        }
+        else{
+            this.name = name;
+        }
     }
 
     printSchema() {
@@ -324,7 +366,10 @@ module.exports = class Table {
 
     toHTML(path) {
         if(path == undefined){
-            path = ''
+            path = '';
+        }
+        else if(typeof(path) !== "string"){
+            path = '';
         }
         let i;
         // Writes table into a new html file for better visualization
@@ -377,6 +422,9 @@ module.exports = class Table {
 
     toCSV(path) {
         if(path == undefined){
+            path = '';
+        }
+        else if(typeof(path) !== "string"){
             path = '';
         }
         let i;
@@ -464,7 +512,7 @@ module.exports = class Table {
     }
 
     simpleSearchWithAttribute(column, value, attribute) {
-        if (typeof (column) != "string" || typeof (value) != "string" || typeof (attribute) != "string") {
+        if (typeof (column) !== "string" || typeof (value) !== "string" || typeof (attribute) !== "string") {
             console.warn("Failed searching table. Make sure column, value and attribute are both of type string")
         }
         // Looks for rows that match and adds value of the attribute to return array
@@ -572,12 +620,44 @@ module.exports = class Table {
     }
 
     removeByIndex(index) {
-        // Removes item from table at give index
-        if (index > this.table.length) {
-            console.warn(`Index exceed ${this.name}'s size`);
-        } else {
-            // Removes element from array by index
-            let removed = this.table.splice(index, 1);
+        if(typeof(index) !== "number"){
+            console.warn("Failed removing item from table. Make sure index is of type number")
+        }
+        else {
+            // Removes item from table at give index
+            if (index > this.table.length) {
+                console.warn(`Index exceed ${this.name}'s size`);
+            } else {
+                // Removes element from array by index
+                let removed = this.table.splice(index, 1);
+                let updatedTable = JSON.stringify(this.table);
+                fs.writeFileSync(this.filename, updatedTable, (err) => {
+                    if (err) console.log(err);
+                    else {
+                        console.log(`${this.filename} updated`);
+                    }
+                });
+                console.log(`Successfully removed item ${removed.toString()} from ${this.name}`);
+            }
+        }
+    }
+
+    removeByAttribute(column, value) {
+        // Removes all the elements that match column = value from table
+        if(typeof(column) !== "string" && typeof(value) !== "string"){
+            console.warn("Error removing item from table. Make sure column and value are of type string");
+        }
+        else {
+            let result = this.returnIndices(column, value);
+            for (let i in result) {
+                for (let j in this.table) {
+                    if (result[i] == j) {
+                        console.log(`Successfully removed ${this.table[j].toString()}`);
+                        this.table[j] = undefined
+                    }
+                }
+            }
+            this.table = this.table.clean();
             let updatedTable = JSON.stringify(this.table);
             fs.writeFileSync(this.filename, updatedTable, (err) => {
                 if (err) console.log(err);
@@ -585,33 +665,11 @@ module.exports = class Table {
                     console.log(`${this.filename} updated`);
                 }
             });
-            console.log(`Successfully removed item ${removed.toString()} from ${this.name}`);
         }
-    }
-
-    removeByAttribute(column, value) {
-        // Removes all the elements that match column = value from table
-        let result = this.returnIndices(column, value);
-        for (let i in result) {
-            for (let j in this.table) {
-                if (result[i] == j) {
-                    console.log(`Successfully removed ${this.table[j].toString()}`);
-                    this.table[j] = undefined
-                }
-            }
-        }
-        this.table = this.table.clean();
-        let updatedTable = JSON.stringify(this.table);
-        fs.writeFileSync(this.filename, updatedTable, (err) => {
-            if (err) console.log(err);
-            else {
-                console.log(`${this.filename} updated`);
-            }
-        });
     }
 
     swap(target, destination) {
-        if (typeof (target) != "number" || typeof (destination) != "number") {
+        if (typeof (target) !== "number" || typeof (destination) !== "number") {
             console.warn("Failed swapping items. Make sure target and destination are both not  empty and of type number");
         } else {
             // Swaps rows
@@ -624,7 +682,7 @@ module.exports = class Table {
 
     static join(table1, table2, attribute1, attribute2) {
         // Performs simple inner join on table1 and table2
-        if (table1 instanceof Table && table2 instanceof Table) {
+        if (table1 instanceof Table && table2 instanceof Table && typeof(attribute1) === "string" && typeof(attribute2) === "string") {
             console.log("Both of them instance of table");
             let newSchema = table1.schema;
             let i;
