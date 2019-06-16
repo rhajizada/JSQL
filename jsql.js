@@ -107,6 +107,7 @@ Object.defineProperty(Array.prototype, "isEmpty", {
 const fs = require('fs');
 const file2json = require('./file2json');
 const csv2json = require('./csv2json');
+const sqlite2json = require('./sqlite2json');
 
 module.exports = class Table {
     constructor(init) {
@@ -200,6 +201,19 @@ module.exports = class Table {
         }
     }
 
+    static fromDB(filename) {
+        // Constructs an array of tables from given sqlite3 database
+        const newTableData = sqlite2json(filename);
+        if(!newTableData.isEmpty()){
+            let newTables = [];
+            for(let i in newTableData){
+                newTables.push(new Table(newTableData[i]));
+            }
+            return newTables;
+        }
+    }
+
+
     static newTable(name, schema){
         // Another way to construct new table
         if(typeof(name) != "string" && !Array.isArray(schema)){
@@ -231,7 +245,7 @@ module.exports = class Table {
 
     static fromComplexJSON(filename) {
         // Creates an array of tables from complex JSON file
-        if(typeof(file) !== "string"){
+        if(typeof(filename) !== "string"){
             console.warn(`Error creating array of tables from compplex json. Make sure filename is of type string`);
         }
         else{
@@ -243,11 +257,18 @@ module.exports = class Table {
             let k;
             let newFiles = [];
             let newSchema = [];
+            if (filename.includes('/')) {
+                const pathSize = filename.split('/').length
+                const fileNameWithoutPath = filename.split('/')[pathSize - 1];
+                filename = fileNameWithoutPath.split('.')[0];
+            } else {
+                filename = filename.split('.')[0];
+            }!fs.existsSync(filename) && fs.mkdirSync(filename); // Creates folder in case folder does not exist
             for (i in tableNames) {
-                fs.writeFileSync(`${filename.split('.json')[0]}_${tableNames[i]}.json`, JSON.stringify(file[tableNames[i]]), (err) => {
+                fs.writeFileSync(`${filename}/${tableNames[i]}.json`, JSON.stringify(file[tableNames[i]]), (err) => {
                     if (err) console.log(err);
                 });
-                newFiles.push(`${filename.split('.json')[0]}_${tableNames[i]}.json`);
+                newFiles.push(`${filename}/${tableNames[i]}.json`);
             }
             let tables = []
             for (i in newFiles) {
@@ -418,6 +439,7 @@ module.exports = class Table {
             if (err) console.warn(err);
             else console.log("HTML file of table created");
         });
+        return `${path}${this.name}.html`;
     }
 
     toCSV(path) {
@@ -468,6 +490,7 @@ module.exports = class Table {
             consoleMessage = `Updated ${this.csvName}`;
         } else {
             consoleMessage = `Converted ${this.filename} to CSV and created ${newFileName}`;
+            return `${path}${newFileName}`;
         }
         console.log(consoleMessage);
     }
@@ -683,41 +706,46 @@ module.exports = class Table {
     static join(table1, table2, attribute1, attribute2) {
         // Performs simple inner join on table1 and table2
         if (table1 instanceof Table && table2 instanceof Table && typeof(attribute1) === "string" && typeof(attribute2) === "string") {
-            console.log("Both of them instance of table");
-            let newSchema = table1.schema;
-            let i;
-            let j;
-            let k;
-            for (i in table2.schema) {
-                if (!(newSchema.includes(table2.schema[i]))) {
-                    newSchema.push((table2.schema[i]));
+            if(table1.schema.includes(attribute1) && table2.schema.includes(attribute2)) {
+                console.log("Both of them instance of table");
+                let newSchema = table1.schema;
+                let i;
+                let j;
+                let k;
+                for (i in table2.schema) {
+                    if (!(newSchema.includes(table2.schema[i]))) {
+                        newSchema.push((table2.schema[i]));
+                    }
                 }
-            }
-            let join = new Table({
-                name: `${table1.name}_${table2.name}_join`,
-                schema: newSchema,
-                isNew: true
-            });
-            for (i in table1.table) {
-                let val1 = table1.table[i][attribute1];
-                for (j in table2.table) {
-                    let val2 = table2.table[j][attribute2];
-                    let obj = {};
-                    if (val1 == val2) {
-                        for (k in newSchema) {
-                            if (table2.schema.includes(newSchema[k])) {
-                                obj[newSchema[k]] = table2.table[j][newSchema[k]];
-                            } else {
-                                obj[newSchema[k]] = table1.table[i][newSchema[k]];
+                let join = new Table({
+                    name: `${table1.name}_${table2.name}_join`,
+                    schema: newSchema,
+                    isNew: true
+                });
+                for (i in table1.table) {
+                    let val1 = table1.table[i][attribute1];
+                    for (j in table2.table) {
+                        let val2 = table2.table[j][attribute2];
+                        let obj = {};
+                        if (val1 == val2) {
+                            for (k in newSchema) {
+                                if (table2.schema.includes(newSchema[k])) {
+                                    obj[newSchema[k]] = table2.table[j][newSchema[k]];
+                                } else {
+                                    obj[newSchema[k]] = table1.table[i][newSchema[k]];
+                                }
                             }
                         }
-                    }
-                    if (Object.values(obj) != 0) {
-                        join.insert(obj);
+                        if (Object.values(obj) != 0) {
+                            join.insert(obj);
+                        }
                     }
                 }
+                return join;
             }
-            return join;
+            else{
+                console.warn("Wrong attribute given");
+            }
         } else {
             console.warn("Failed performing join. Make sure  table1 and table2 are both instance  of Table");
         }

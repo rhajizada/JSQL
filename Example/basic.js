@@ -62,4 +62,4 @@ led_zep_iv.swap(0, 1);
 led_zep_iv.print();
 led_zep_iv.swap(0,1);
 led_zep_iv.print();
-console.dir(led_zep.duplicateSearch());
+console.dir(led_zep.duplicateSearch()); // Should print undefined

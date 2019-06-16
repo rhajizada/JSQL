@@ -1,10 +1,10 @@
 {
   "name": "jsql",
-  "version": "0.0.5",
+  "version": "0.0.7",
   "description": "Library that allows user querying array of JSONs as if it was a SQL database",
   "main": "jsql.js",
   "scripts": {
-    "test": "node test_join.js"
+    "test": "node Example/basic.js"
   },
   "repository": {
     "type": "git",
@@ -17,5 +17,6 @@
   },
   "homepage": "https://github.com/rhajizada/JSQL#readme",
   "dependencies": {
+    "better-sqlite3": "^5.4.0"
   }
 }
