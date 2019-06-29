@@ -6,4 +6,4 @@ let location_history = Table.fromComplexJSON('Sample Data/My Data/Location Histo
 for(i in location_history){
     location_history[i].epochToReadable('timestampMs'); // this function takes time formatted as epoch into time string
 }
-location_history[0].toHTML('Sample Data/My Data/Location/'); // Creates an html
+location_history[0].print()

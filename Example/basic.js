@@ -23,9 +23,9 @@ let led_zep = Table.fromFile('Sample Data/songs.json', 'Led Zeppelin'); // anoth
 //let price_index = new Table({filename: 'Sample Data/price-index.csv', name: 'Price Indexes'}); // creates  a new table and converts to json from price-index.csv
 let price_index = Table.fromFile('Sample Data/price-index.csv', 'Price Indexes');
 price_index.printSchema(); // Prints schema of price_index on console
-price_index.toHTML('Sample Data/');
+price_index.toHTML('Sample Data/HTML');
 console.log(`Led zeppelin schema: ${led_zep.schema}`); // Another way to print schema
-led_zep.toHTML(); // Creates html file called 'Led Zeppelin.html' from table for easier data visualization
+led_zep.toHTML('Sample Data/HTML'); // Creates html file called 'Led Zeppelin.html' from table for easier data visualization
 let price_index_string = price_index.toString(); // Returns price index table as a formatted string
 // Creating new object to insert into  led_zep table
 let initialSearchResult = led_zep.simpleSearch('Song', 'Dazed and Confused'); // Example of simple search

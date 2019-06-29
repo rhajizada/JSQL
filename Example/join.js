@@ -1,3 +1,4 @@
+// Tests how join works
 let Table = require('../jsql');
 /* Did all of that before */
 let employee_id = new Table({name: 'employee_id', schema: ['employee_id', 'last_name', 'first_name', 'position_id'], isNew: true}); // Creating new empty table

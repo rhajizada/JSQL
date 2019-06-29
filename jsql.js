@@ -68,24 +68,24 @@ Object.prototype.equals = function (object) {
 Object.defineProperty(Object.prototype, "equals", {
     enumerable: false
 });
-// Code for converting object to string
+/* // Code for converting object to string
 if (Object.prototype.toString) {
-    console.warn("Overriding existing Object.prototype.toString. Possible causes: New API defines the method, there's a framework conflict or you've got double inclusions in your code.");
+   console.warn("Overriding existing Object.prototype.toString. Possible causes: New API defines the method, there's a framework conflict or you've got double inclusions in your code.");
 }
 Object.prototype.toString = function () {
-    let string = "";
-    for (let i in Object.values(this)) {
-        if (i !== this.length - 1) {
-            string += `${Object.values(this)[i]} `;
-        } else {
-            string += `${Object.values(this)[i]}`;
-        }
-    }
-    return string;
+   let string = "";
+   for (let i in Object.values(this)) {
+       if (i !== this.length - 1) {
+           string += `${Object.values(this)[i]} `;
+       } else {
+           string += `${Object.values(this)[i]}`;
+       }
+   }
+   return string;
 };
 Object.defineProperty(Object.prototype, "toString", {
-    enumerable: false
-});
+   enumerable: false
+}); */
 // Code for checking if array is empty
 if (Array.prototype.isEmpty) {
     console.warn("Overriding existing Array.prototype.isEmpty. Possible causes: New API defines the method, there's a framework conflict or you've got double inclusions in your code.");
@@ -102,6 +102,7 @@ Object.defineProperty(Array.prototype, "isEmpty", {
     file2json - converts json file containing array of objects into a JavaScript array of objects
     csv2json - converts csv file into a json file containing array of objects
     fs - module needed to work with filesystem
+    sqlite2json - takes a db and makes multiple json files from them
  */
 
 const fs = require('fs');
@@ -201,9 +202,9 @@ module.exports = class Table {
         }
     }
 
-    static fromDB(filename) {
+    static fromDB(filename, path) {
         // Constructs an array of tables from given sqlite3 database
-        const newTableData = sqlite2json(filename);
+        const newTableData = sqlite2json(filename, path);
         if(!newTableData.isEmpty()){
             let newTables = [];
             for(let i in newTableData){
@@ -318,6 +319,10 @@ module.exports = class Table {
         this.schema = newSchema;
     }
 
+    getSchema() {
+        return this.schema;
+    }
+
     rename(name) {
         if(typeof(name) !== "string"){
             console.warn("Failed renaming table. Make sure name is of type string");
@@ -362,6 +367,7 @@ module.exports = class Table {
 
     insert(row) {
         // Given the object inserts it into the table and also adds it to the file
+        // Returns true if inserted succesfully
         const rowSchema = [];
         for (let i = 0; i < Object.keys(row).length; i++) {
             rowSchema.push(Object.keys(row)[i]);
@@ -377,11 +383,13 @@ module.exports = class Table {
                 }
             });
             console.log(`Successfully inserted ${row.toString()} to ${this.name}`);
+            return true;
         } else {
             console.warn("Input object is using wrong schema.\nFailed inserting into table.\nTable schema is: ");
             console.log(this.schema);
             console.warn("Your input object schema is: ");
             console.log(rowSchema);
+            return false;
         }
     }
 
@@ -435,62 +443,69 @@ module.exports = class Table {
         html += `</table>
                  </body>
                  </html>`;
-        fs.writeFileSync(`${path}${this.name}.html`, html, (err) => {
-            if (err) console.warn(err);
-            else console.log("HTML file of table created");
-        });
-        return `${path}${this.name}.html`;
+        if(path !== '') {
+            !fs.existsSync(path) && fs.mkdirSync(path) && path !== '';
+            fs.writeFileSync(`${path}/${this.name}.html`, html, (err) => {
+                if (err) console.warn(err);
+                else console.log("HTML file of table created");
+            });
+            return `${path}/${this.name}.html`;
+        }
+        else{
+            fs.writeFileSync(`${path}${this.name}.html`, html, (err) => {
+                if (err) console.warn(err);
+                else console.log("HTML file of table created");
+            });
+            return `${path}${this.name}.html`;
+        }
     }
 
-    toCSV(path) {
-        if(path == undefined){
-            path = '';
-        }
-        else if(typeof(path) !== "string"){
-            path = '';
-        }
+    toCSV(){
         let i;
         let newFileName = '';
-        if (this.isCSV) {
+        if(this.isCSV){
             newFileName = this.csvName;
-        } else {
+        }
+        else{
             newFileName = this.filename.split('.json')[0] + '.csv';
         }
         let csv = '';
         // noinspection Annotator
-        for (i in this.schema) {
-            if (i !== this.schema.length - 1) {
-                csv += `${this.schema[i]},`
-            } else {
+        for(i  in this.schema){
+            if(i !== this.schema.length - 1) {
+                csv +=  `${this.schema[i]},`
+            }
+            else {
                 csv += `${this.schema[i]}`
             }
         }
         csv += '\n';
         // noinspection Annotator
-        for (i in this.table) {
-            for (let j in Object.values(this.table[i])) {
-                if (j !== Object.values(this.table[i]).length - 1) {
+        for(i in this.table){
+            for(let j in Object.values(this.table[i])){
+                if(j !== Object.values(this.table[i]).length - 1){
                     csv += `${Object.values(this.table[i])[j]},`
-                } else {
+                }
+                else{
                     csv += `${Object.values(this.table[i])[j]}`;
                 }
             }
-            if (i !== this.table.length - 1) {
+            if(i !== this.table.length - 1) {
                 csv += '\n';
             }
         }
-        fs.writeFileSync(`${path}${newFileName}`, csv, (err) => {
+        fs.writeFileSync(newFileName, csv, (err) => {
             if (err) console.log(err);
             else {
                 console.log(`${this.filename} updated`);
             }
         });
         let consoleMessage = "";
-        if (this.isCSV) {
+        if(this.isCSV){
             consoleMessage = `Updated ${this.csvName}`;
-        } else {
+        }
+        else{
             consoleMessage = `Converted ${this.filename} to CSV and created ${newFileName}`;
-            return `${path}${newFileName}`;
         }
         console.log(consoleMessage);
     }
